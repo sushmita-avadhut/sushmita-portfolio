@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Split Payment · Sushmita Avadhut</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff;
+      --bg-light: #EEF2F8;
+      --ink: #1A1824;
+      --ink-soft: #3D3D3D;
+      --ink-muted: #777;
+      --blue: #2563EB;
+      --blue-dark: #1E3A6E;
+      --blue-light: #EBF1FC;
+      --border: #E2E8F0;
+      --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--white); color: var(--ink); line-height: 1.7; }
+
+    /* ── PROGRESS BAR ── */
+    #progress { position: fixed; top: 56px; left: 0; height: 3px; background: var(--blue); width: 0%; z-index: 99; transition: width 0.1s linear; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-back {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; color: var(--ink);
+      text-decoration: none; padding: 6px 16px; border-radius: 8px;
+      border: 1.5px solid var(--border); transition: all 0.15s;
+    }
+    .nav-back:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .nav-label { font-size: 13px; color: var(--ink-muted); font-family: var(--mono); }
+
+    /* ── HERO ── */
+    .hero {
+      margin-top: 56px; position: relative; overflow: hidden;
+      background: #1a2035; min-height: 460px;
+      display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+    }
+    .hero-text { padding: 64px 56px; color: #fff; }
+    .hero h1 { font-size: 52px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 10px; }
+    .hero-subtitle { font-size: 16px; color: #4A9EE8; font-weight: 600; margin-bottom: 20px; text-decoration: underline; }
+    .hero-body { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.8; max-width: 460px; }
+    .hero-body strong { color: #fff; font-weight: 700; }
+    .hero-img { height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px 20px 0 0; }
+    .hero-img img { width: 100%; max-width: 620px; object-fit: contain; }
+
+    /* ── SECTION WRAPPERS ── */
+    .section-white { background: var(--white); padding: 72px 0; }
+    .section-light { background: var(--bg-light); padding: 72px 0; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 48px; }
+    .container-wide { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
+
+    /* ── TYPOGRAPHY ── */
+    .section-tag { font-size: 13px; font-weight: 700; color: var(--blue); letter-spacing: 0.05em; margin-bottom: 4px; }
+    h2.section-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 16px; }
+    h2.section-title.blue { color: var(--blue); }
+    h3.sub-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; color: var(--ink); }
+    h3.sub-title.blue { color: var(--blue); }
+    p.body-text { font-size: 15px; color: var(--ink-soft); line-height: 1.8; margin-bottom: 14px; }
+    p.body-text:last-child { margin-bottom: 0; }
+    .italic-note { font-style: italic; color: var(--blue); font-size: 14px; margin-bottom: 8px; }
+
+    /* ── OVERVIEW ── */
+    .overview-text { text-align: center; max-width: 680px; margin: 0 auto; }
+    .overview-text .overview-label { font-size: 14px; font-weight: 700; color: var(--blue); margin-bottom: 20px; }
+
+    /* ── PROJECT META ROW ── */
+    .meta-row { display: flex; gap: 64px; flex-wrap: wrap; align-items: flex-start; padding: 40px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-top: 40px; }
+    .meta-item .meta-key { font-size: 13px; color: var(--ink-muted); margin-bottom: 6px; }
+    .meta-item .meta-val { font-size: 18px; font-weight: 800; }
+    .tools-icons { display: flex; gap: 10px; align-items: center; font-size: 22px; }
+    .tool-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 1px solid var(--border); background: var(--white); }
+
+    /* ── TWO COL ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+    .two-col-3-2 { display: grid; grid-template-columns: 3fr 2fr; gap: 48px; }
+    @media(max-width:720px) { .two-col, .two-col-3-2, .hero { grid-template-columns: 1fr; } }
+
+    /* ── SKILL COLUMNS ── */
+    .skills-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px 24px; margin-top: 20px; }
+    .skills-grid ul { list-style: none; padding: 0; }
+    .skills-grid li { font-size: 14px; color: var(--ink-soft); padding: 3px 0; }
+    .skills-grid li::before { content: '• '; color: var(--ink-muted); }
+
+    /* ── TIMELINE ── */
+    .timeline { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; margin-top: 32px; }
+    @media(max-width:900px) { .timeline { grid-template-columns: repeat(3,1fr); } }
+    .tl-phase { }
+    .tl-badge { background: var(--blue); color: #fff; font-size: 11px; font-weight: 700; padding: 5px 8px; border-radius: 4px; text-align: center; margin-bottom: 8px; }
+    .tl-head { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+    .tl-items { font-size: 12px; color: var(--ink-soft); }
+    .tl-items li { list-style: none; padding: 2px 0; border-left: 2px solid var(--border); padding-left: 8px; margin-bottom: 2px; }
+
+    /* ── DELIVERABLES ── */
+    .del-list { list-style: none; padding: 0; }
+    .del-list li { font-size: 15px; color: var(--ink-soft); padding: 8px 0; border-bottom: 1px solid var(--border); line-height: 1.7; }
+    .del-list li::before { content: '· '; color: var(--blue); font-weight: 800; }
+    .del-list li:last-child { border-bottom: none; }
+
+    /* ── DESIGN PROCESS DIAGRAM ── */
+    .process-diagram { background: var(--white); border: 1.5px dashed #9AB8E8; border-radius: 12px; padding: 32px; margin-top: 24px; }
+    .process-steps { display: flex; align-items: flex-end; gap: 0; position: relative; }
+    .ps { text-align: center; flex: 1; }
+    .ps-arrow { font-size: 13px; color: var(--ink-muted); margin-bottom: 8px; }
+    .ps-label { background: var(--ink); color: #fff; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 6px; display: inline-block; }
+    .ps-arrow-line { font-size: 20px; color: var(--blue); margin: 0 -4px; align-self: center; }
+    .process-notes { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-muted); margin-top: 12px; font-style: italic; }
+
+    /* ── HIGHLIGHT / CALLOUT ── */
+    .callout { background: var(--blue-light); border-left: 3px solid var(--blue); border-radius: 0 10px 10px 0; padding: 18px 22px; margin: 20px 0; }
+    .callout p { font-size: 15px; color: var(--ink); margin: 0; }
+    .callout p strong { color: var(--blue-dark); }
+
+    /* ── STAT CHIPS ── */
+    .stat-chips { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+    .stat-chip { background: var(--blue); color: #fff; padding: 4px 12px; border-radius: 100px; font-size: 14px; font-weight: 700; }
+
+    /* ── STEPS (numbered) ── */
+    .step-list { margin-top: 20px; }
+    .step-item { display: flex; gap: 16px; margin-bottom: 20px; }
+    .step-num { flex-shrink: 0; font-size: 14px; font-weight: 700; color: var(--blue); }
+    .step-cta { font-weight: 700; color: var(--blue); font-size: 15px; }
+
+    /* ── IMAGE SECTION ── */
+    .section-img { width: 100%; border-radius: 12px; display: block; margin: 32px 0; box-shadow: 0 2px 24px rgba(0,0,0,0.08); }
+    .section-img.sm { max-width: 600px; }
+    .section-img.md { max-width: 800px; }
+
+    /* ── USER RESEARCH EMPATHY CARDS ── */
+    .empathy-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 28px; }
+    @media(max-width:720px) { .empathy-grid { grid-template-columns: 1fr; } }
+    .empathy-card { background: var(--white); border-radius: 12px; padding: 24px; box-shadow: 0 1px 12px rgba(0,0,0,0.07); }
+    .empathy-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+    .empathy-card p { font-size: 14px; color: var(--ink-soft); margin: 0; }
+
+    /* ── USER STORY CARDS ── */
+    .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+    .story-card { background: #F5F7FB; border-radius: 10px; padding: 18px; font-size: 14px; color: var(--ink-soft); border-left: 3px solid var(--blue-light); }
+    .story-card .story-tag { font-size: 11px; color: var(--ink-muted); margin-bottom: 6px; font-family: var(--mono); }
+
+    /* ── SCENARIOS ── */
+    .scenario-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 24px; }
+    @media(max-width:800px) { .scenario-grid { grid-template-columns: 1fr; } }
+    .scenario-card { background: var(--white); border-radius: 12px; padding: 24px; border: 1px solid var(--border); }
+    .scenario-card .sc-type { font-size: 11px; color: var(--ink-muted); font-family: var(--mono); margin-bottom: 8px; }
+    .scenario-card h4 { font-size: 16px; font-weight: 800; color: var(--blue); margin-bottom: 12px; }
+    .scenario-card p { font-size: 14px; color: var(--ink-soft); }
+
+    /* ── PROBLEM AREAS ── */
+    .problem-list { margin-top: 20px; }
+    .problem-item { padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .problem-item:last-child { border-bottom: none; }
+    .problem-item .p-num { font-size: 13px; color: var(--ink-muted); margin-bottom: 4px; }
+    .problem-item .p-sub { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+    .problem-item .p-title { font-size: 18px; font-weight: 800; }
+    .italic-label { font-style: italic; color: var(--blue); font-size: 13px; margin-bottom: 20px; }
+
+    /* ── INSIGHTS 3-COL ── */
+    .insight-3col { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; margin-top: 32px; }
+    @media(max-width:720px) { .insight-3col { grid-template-columns: 1fr; } }
+    .insight-block h4 { font-size: 15px; font-weight: 700; color: var(--blue-dark); margin-bottom: 10px; text-decoration: underline; }
+    .insight-block ul { padding-left: 18px; font-size: 14px; color: var(--ink-soft); }
+    .insight-block ul li { margin-bottom: 8px; }
+    .insight-block ul li strong, .insight-block ul li b { color: var(--ink); }
+
+    /* ── GOALS OBJECTIVE ── */
+    .goals-obj { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; background: var(--bg-light); border-radius: 16px; padding: 36px; margin-top: 32px; }
+    .goals-obj ul { padding-left: 20px; font-size: 15px; color: var(--ink-soft); }
+    .goals-obj ul li { margin-bottom: 10px; }
+
+    /* ── RE-DESIGN BRIEF CARDS ── */
+    .brief-3col { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 32px; }
+    @media(max-width:720px) { .brief-3col { grid-template-columns: 1fr; } }
+    .brief-card { background: var(--white); border-radius: 14px; padding: 28px; }
+    .brief-card .bc-icon { font-size: 32px; margin-bottom: 16px; }
+    .brief-card h4 { font-size: 17px; font-weight: 800; color: var(--blue); margin-bottom: 12px; }
+    .brief-card p { font-size: 14px; color: var(--ink-soft); }
+
+    /* ── COMPONENT LIST ── */
+    .comp-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; margin-top: 24px; }
+    .comp-col h4 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+    .comp-col ul { list-style: none; padding: 0; }
+    .comp-col ul li { font-size: 14px; color: var(--blue); padding: 3px 0; }
+    .comp-col ul li::before { content: '· '; color: var(--blue); }
+
+    /* ── FINAL PROTOTYPE STEPS ── */
+    .proto-steps { list-style: none; padding: 0; margin-top: 20px; }
+    .proto-steps li { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--ink-soft); }
+    .proto-steps li:last-child { border-bottom: none; }
+    .proto-steps li strong { color: var(--ink); }
+
+    /* ── TESTING STATS ── */
+    .test-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-top: 32px; }
+    @media(max-width:720px) { .test-stats { grid-template-columns: repeat(2,1fr); } }
+    .test-stat { background: var(--white); border-radius: 12px; padding: 24px; text-align: center; border: 1px solid var(--border); }
+    .test-stat .ts-val { font-size: 36px; font-weight: 800; color: var(--blue); letter-spacing: -1px; }
+    .test-stat .ts-lbl { font-size: 13px; color: var(--ink-muted); margin-top: 4px; }
+    .test-stat .ts-sub { font-size: 12px; color: var(--blue); font-style: italic; }
+
+    /* ── HYPOTHESIS TABLE ── */
+    .hyp-table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    .hyp-table th { background: var(--bg-light); text-align: left; padding: 12px 16px; font-size: 14px; font-weight: 700; border-bottom: 2px solid var(--border); }
+    .hyp-table td { padding: 16px; font-size: 14px; color: var(--ink-soft); border-bottom: 1px solid var(--border); vertical-align: top; }
+    .hyp-table tr:last-child td { border-bottom: none; }
+
+    /* ── FUTURE SCOPE ── */
+    .future-list { list-style: none; padding: 0; margin-top: 20px; }
+    .future-list li { font-size: 15px; color: var(--ink-soft); padding: 14px 0; border-bottom: 1px solid var(--border); line-height: 1.7; }
+    .future-list li:last-child { border-bottom: none; }
+    .future-list li::before { content: '✦ '; color: var(--blue); }
+
+    /* ── DIVIDER ── */
+    .section-divider { height: 1px; background: var(--border); margin: 0; }
+
+    /* ── FOOTER ── */
+    .cs-footer { background: var(--ink); color: #fff; padding: 64px 48px; text-align: center; }
+    .cs-footer h3 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .cs-footer p { color: rgba(255,255,255,0.6); font-size: 15px; margin-bottom: 28px; }
+    .btn-back { display: inline-flex; align-items: center; gap: 8px; background: var(--blue); color: #fff; padding: 14px 32px; border-radius: 100px; font-size: 15px; font-weight: 700; text-decoration: none; }
+    .btn-back:hover { opacity: 0.85; }
+
+    /* utility */
+    b, strong { font-weight: 700; }
+    .mt-8 { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    .mt-32 { margin-top: 32px; }
+    .mb-0 { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav>
+  <a class="nav-back" href="index.html">← Back to Portfolio</a>
+  <span class="nav-label">Case Study · Split Payment · Dell Technologies</span>
+</nav>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<div class="hero">
+  <div class="hero-text">
+    <h1>Split-Payment</h1>
+    <div class="hero-subtitle">Manage your Credit Cards and Financing options seamlessly</div>
+    <p class="hero-body">Experience the convenience of paying your order total with <strong>multiple payment methods</strong> during <strong>checkout</strong>. Choose the option that suits you best, ensuring a seamless and hassle-free shopping.</p>
+  </div>
+  <div class="hero-img">
+    <img src="assets/sp-hero.png" alt="Split Payment checkout screen on laptop">
+  </div>
+</div>
+
+<!-- ═══════════════════════ OVERVIEW ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <div class="overview-text">
+      <div class="overview-label">Overview</div>
+      <p class="body-text" style="text-align:center; font-size:16px;">Split Payment is splitting your bill using different methods of payment during e-commerce checkout. Being on the Purchase Experience team, I took on the responsibility of identifying user pain points, when utilizing various payment methods. My goal was to elevate the split-payment experience, ensuring a trust worthy, seamless and enjoyable transaction process for all users. During the research, I found various user hiccups that could be solved for while using multiple payment methods.</p>
+    </div>
+
+    <div class="meta-row">
+      <div class="meta-item">
+        <div class="meta-key">Project Duration</div>
+        <div class="meta-val">17.5 Weeks</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Tools Used</div>
+        <div class="tools-icons mt-8">
+          <div class="tool-icon" title="Figma">🎨</div>
+          <div class="tool-icon" title="Maze">🟠</div>
+          <div class="tool-icon" title="Adobe Illustrator">🖊️</div>
+          <div class="tool-icon" title="UserCheck">✅</div>
+          <div class="tool-icon" title="Microsoft Teams">💬</div>
+          <div class="tool-icon" title="Outlook">📧</div>
+        </div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Role</div>
+        <div class="meta-val">UX Researcher</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ ROLE + SKILLS + TIMELINE ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <h3 class="sub-title">Role</h3>
+    <div style="font-size:18px; font-weight:800; margin-bottom:20px;">UX Researcher</div>
+    <div class="skills-grid">
+      <ul>
+        <li>Domain &amp; Product understanding</li>
+        <li>User Interview</li>
+        <li>User Research</li>
+      </ul>
+      <ul>
+        <li>Affinity mapping</li>
+        <li>Persona</li>
+        <li>Empathy map</li>
+        <li>Customer journey map</li>
+      </ul>
+      <ul>
+        <li>Card sorting</li>
+        <li>User flow</li>
+        <li>User stories</li>
+        <li>Ideation</li>
+      </ul>
+      <ul>
+        <li>Low fidelity</li>
+        <li>High fidelity</li>
+        <li>Usability testing</li>
+      </ul>
+    </div>
+
+    <h3 class="sub-title mt-32">Timeline</h3>
+    <div class="timeline">
+      <div class="tl-phase">
+        <div class="tl-badge">7th Feb – 28th Feb</div>
+        <div class="tl-head">Introduction</div>
+        <ul class="tl-items">
+          <li>Onboarding</li>
+          <li>Understanding</li>
+        </ul>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-badge">1st Mar – 26th Mar</div>
+        <div class="tl-head">Discovery</div>
+        <ul class="tl-items">
+          <li>Product Research</li>
+          <li>User Research</li>
+          <li>Market Research</li>
+          <li>Analysis</li>
+        </ul>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-badge">27th Mar – 30th April</div>
+        <div class="tl-head">Ideation</div>
+        <ul class="tl-items">
+          <li>Low-fi Wireframing</li>
+          <li>Conceptulization</li>
+          <li>Iterations (1,2,3)</li>
+          <li>High-fi Wireframing</li>
+        </ul>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-badge">1st May – 7th May</div>
+        <div class="tl-head">Prototyping</div>
+        <ul class="tl-items">
+          <li>Prototype 1</li>
+          <li>Final Prototypes</li>
+        </ul>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-badge">8th May – 25th May</div>
+        <div class="tl-head">Testing</div>
+        <ul class="tl-items">
+          <li>Testing</li>
+          <li>Iteration &amp; Insights</li>
+        </ul>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-badge">25th May – 3rd June</div>
+        <div class="tl-head">Retrospection</div>
+        <ul class="tl-items">
+          <li>Compilation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ DESIGN BRIEF + DELIVERABLES ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <h2 class="section-title">Given Design Brief</h2>
+    <p class="body-text">To understand, analyze and conduct research on split payment (two payments) for US region and suggesting improvements in current website while transforming to unified flow.</p>
+
+    <div class="two-col mt-32">
+      <div>
+        <h3 class="sub-title">Deliverables</h3>
+        <ul class="del-list mt-16">
+          <li>Understand design brief, problems and <strong>Identify immediate areas of improvement</strong> to Split Payment feature through data analysis by <strong>conducting research</strong>.</li>
+          <li>Come up with <strong>prototypes</strong> and recipes to <strong>test</strong> your <strong>hypothesis</strong>.</li>
+          <li>Contribute in grooming and prioritizing features for MVP and <strong>post-MVP</strong> deliverables.</li>
+          <li>Understand how to <strong>facilitate and manage</strong> design constraints.</li>
+          <li>Develop a holistic understanding of the organization through meetings in different <strong>cross-functional</strong> departments.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="sub-title">Key Metrix</h3>
+        <ul class="del-list mt-16">
+          <li>Improvement in CSAT score</li>
+          <li>Enhanced User experience (user testing results)</li>
+        </ul>
+        <h3 class="sub-title mt-24">Competencies / Skills Developed</h3>
+        <ul class="del-list mt-16">
+          <li>Dealing with ambiguity</li>
+          <li>Prioritizing requirements</li>
+          <li>Facilitating discussions</li>
+          <li>Communicating ideas and decisions</li>
+          <li>Executive presence</li>
+          <li>Driving results, influencing</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ DESIGN PROCESS ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <div class="two-col-3-2" style="align-items:center;">
+      <div>
+        <h2 class="section-title">Design Process</h2>
+        <p class="body-text">Discovery and Framing is a collaborative process that explores and validates user needs to ensure we are identifying the right features to include when building a new product or feature.</p>
+      </div>
+      <div class="process-diagram">
+        <div style="font-size:12px; color:var(--ink-muted); text-align:center; margin-bottom:16px; font-style:italic;">learn about users</div>
+        <div class="process-steps">
+          <div class="ps">
+            <div class="ps-arrow">help define problem/s</div>
+            <div class="ps-label" style="background:#2D3A6E; font-size:12px;">Empathize</div>
+          </div>
+          <div class="ps-arrow-line">→</div>
+          <div class="ps">
+            <div class="ps-label" style="background:#2D3A6E; font-size:12px;">Define</div>
+          </div>
+          <div class="ps-arrow-line">→</div>
+          <div class="ps">
+            <div class="ps-arrow">create new ideas</div>
+            <div class="ps-label" style="background:#2D3A6E; font-size:12px;">Ideate</div>
+          </div>
+          <div class="ps-arrow-line">→</div>
+          <div class="ps">
+            <div class="ps-label" style="background:#2D3A6E; font-size:12px;">Prototype</div>
+          </div>
+          <div class="ps-arrow-line">→</div>
+          <div class="ps">
+            <div class="ps-label" style="background:#2563EB; font-size:12px;">Test</div>
+          </div>
+        </div>
+        <div class="process-notes">
+          <span>learn &amp; iterate</span>
+          <span>insights that might redefine problem</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ PRODUCT RESEARCH ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <h2 class="section-title blue">Product Research</h2>
+    <p class="body-text" style="color:var(--ink-muted); margin-bottom:40px;">Checkout Experience</p>
+
+    <div class="two-col">
+      <div>
+        <h3 class="sub-title">What is Split payment?</h3>
+        <p class="body-text">A split payment involves using multiple payment sources to settle the whole cost of a single transaction.</p>
+
+        <h3 class="sub-title mt-24">Who uses Split payment and why?</h3>
+        <p class="body-text">Split payment is a convenient mechanism to share costs and for customers that don't want to go above their credit card limit, or who have a daily spending limit on their debit cards.</p>
+        <p class="body-text">The introduction of the split payment mechanism throughout the EU would heavily disrupt cash flow in the economy. The real-time payment of VAT invoices will result in a positive cash flow for the tax authorities.</p>
+      </div>
+      <div>
+        <h3 class="sub-title">Impact of Split payment</h3>
+        <p class="body-text">Merchants who start using SplitPay have seen a <span class="stat-chip">20% – 30%</span> uplift in sales volumes. Less cart abandonments. Customers using SplitPay are <span class="stat-chip">10% – 15%</span> more likely to complete purchases.</p>
+        <p class="body-text mt-16">Currently, the split payment generates 20–30% of the total revenue hence leading to a big impact.</p>
+      </div>
+    </div>
+
+    <div class="two-col mt-32">
+      <div>
+        <h3 class="sub-title">How is <u>Split Payment currently</u> used?</h3>
+        <p class="body-text">After adding the initial payment, customers have the option to add another payment. This added payment, opens up split-payment experience and amounts to apply for each payment to split the order total.</p>
+        <p class="italic-note mt-16">Payment section; add initial payment option.</p>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">Step 1:</div>
+            <div><span class="step-cta">Add Another Payment ›</span></div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">Step 2:</div>
+            <div><span class="step-cta">Apply Amount for each Payment method ›</span></div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">Step 3:</div>
+            <div><span class="step-cta">Review &amp; Submit</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <img src="assets/sp-product-research.png" alt="Checkout split payment UI" class="section-img mb-0" style="margin:0; border-radius:8px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ DFS + USER FLOW ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <div class="two-col">
+      <div>
+        <h3 class="sub-title">What is DFS?</h3>
+        <p class="body-text">Financial Services (DFS) facilitates customer financing of products and services sold.</p>
+        <h3 class="sub-title mt-16">What is DPA?</h3>
+        <p class="body-text">Preferred Account is authorized account for Financing Service.</p>
+      </div>
+      <div>
+        <h3 class="sub-title">Who uses DFS?</h3>
+        <p class="body-text">DFS or DPA is for users who wish for financial support. Users who do not wish to delay their purchase due to personal financial goals, apply for financing.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-title mt-32"> User Flow for Split Payment</h3>
+    <img src="assets/sp-dfs-userflow.png" alt="User flow for split payment" class="section-img">
+  </div>
+</div>
+
+<!-- ═══════════════════════ SPLIT-PAYMENT SCENARIOS ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <h2 class="section-title">Split-Payment Scenarios</h2>
+    <div class="scenario-grid">
+      <div class="scenario-card">
+        <div class="sc-type">Explicit Split-Pay</div>
+        <h4>Select "Add another payment"</h4>
+        <p>When a user has selected split payment explicitly to use more than one payment to complete the order total amount.</p>
+      </div>
+      <div class="scenario-card">
+        <div class="sc-type">Required Split-Pay</div>
+        <h4>Insufficient Credits<br>(Order Total &gt; Credit Limit)</h4>
+        <p>When a user applied for Financing the maximum credits he/she can get are limited. If his order total exceeds the available credits, he is required to add another payment.</p>
+      </div>
+      <div class="scenario-card">
+        <div class="sc-type">Amount to apply change in split payment</div>
+        <h4>Change in Cart / Order Total<br>Order Total ≠ Applied amount</h4>
+        <p>When a user has selected split payment and has applied both the payment but however he wishes to change his cart. By changing his cart, his order total would change. Now his order total would not match the applied amounts so he needs to change the applied amounts.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ UNDERSTANDING CUSTOMER BEHAVIOR ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <div class="two-col" style="align-items:start;">
+      <div>
+        <h3 class="sub-title">Understanding Customer Behavior</h3>
+        <p style="font-size:14px; color:var(--ink-muted); margin-bottom:16px;">Current website:</p>
+        <p class="body-text">Understanding user interactions with the current product is essential for improvement. Analyzing click streams provides valuable insights into what aspects are functioning well for users and which areas may need enhancement.</p>
+        <p class="body-text">The purpose was to understand the most/moderate/least used features. To understand <strong>content</strong> lay-outing and it's <strong>interaction points</strong>.</p>
+        <div style="margin-top:24px; display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;"><span style="width:36px; height:36px; background:#FFAAB0; border-radius:50%; display:inline-block;"></span><span style="font-size:14px;">Not Used</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><span style="width:36px; height:36px; background:#FFC878; border-radius:50%; display:inline-block;"></span><span style="font-size:14px;">Moderate Use</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><span style="width:36px; height:36px; background:#7EC8E3; border-radius:50%; display:inline-block;"></span><span style="font-size:14px;">Most Used</span></div>
+          <div style="display:flex; align-items:center; gap:12px;"><span style="width:36px; height:36px; background:#FFF0A0; border-radius:50%; display:inline-block;"></span><span style="font-size:14px;">Feature Improvement (Scope)</span></div>
+        </div>
+      </div>
+      <div>
+        <img src="assets/sp-scenarios-behavior.png" alt="Customer behavior heatmap" class="section-img mb-0" style="margin:0; border-radius:8px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ USER RESEARCH ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <h2 class="section-title blue">User Research</h2>
+    <p style="color:var(--ink-muted); margin-bottom:32px;">Empathies</p>
+    <div class="empathy-grid">
+      <div class="empathy-card">
+        <h4>Who are the users?</h4>
+        <p>Any customer, based in US and who has an income/employment can use DFS. Any customer who wishes to pay using more than one payment method is an user of split payment.</p>
+      </div>
+      <div class="empathy-card">
+        <h4>Why would they use split-payment?</h4>
+        <p>Any customer who wants to use multiple payment sources for any desired reason. (maintaining credit limit / required split payment)</p>
+      </div>
+      <div class="empathy-card">
+        <h4>Why would they use Financing?</h4>
+        <p>Any customer who needs financial support, who does not wish to delay their purchase due to any financial drawbacks opt for Financing.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ USER INTERVIEWS + STORIES + PERSONA ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <div class="two-col" style="align-items:start;">
+      <div>
+        <h2 class="section-title">User Interviews</h2>
+        <p class="italic-note">Questions asked</p>
+        <ul style="padding-left:18px; font-size:14px; color:var(--ink-soft); line-height:1.9;">
+          <li>Have you ever bought any electronic product online? If yes then how did you prefer paying and how was your experience?</li>
+          <li>Add any item and proceed with checkout, what do you feel as you start checkout?</li>
+          <li>Can you continue with Financing?</li>
+          <li>How do you find the option for Financing? Were you able to comprehend Financing flow and options?</li>
+          <li>Can you add another payment? (Thank you)</li>
+          <li>Do you understand the split payment and new field related to split payment?</li>
+          <li>Any thoughts or suggestions?</li>
+        </ul>
+
+        <h3 class="sub-title mt-32">User Stories</h3>
+        <div class="story-grid mt-16">
+          <div class="story-card">
+            <div class="story-tag">comments</div>
+            As a guest user, I wish to remove one payment from split-pay.
+          </div>
+          <div class="story-card">
+            <div class="story-tag">comments</div>
+            I want to adjust my applied amount after credit card 3FS.
+          </div>
+          <div class="story-card">
+            <div class="story-tag">comments</div>
+            I am a new user, I really like &amp; need XPS but, I don't want to spend that much at once.
+          </div>
+          <div class="story-card">
+            <div class="story-tag">comments</div>
+            My approved credit limit is less than my order total, I still want to complete my purchase.
+          </div>
+        </div>
+      </div>
+      <div>
+        <img src="assets/sp-interviews-persona.png" alt="User interviews and persona" class="section-img mb-0" style="margin:0; border-radius:8px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ USER JOURNEY MAP ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <div class="two-col-3-2">
+      <div>
+        <h2 class="section-title">User Journey Map</h2>
+        <p class="body-text">The purpose of this map was to understand user thoughts, actions and feelings during split payment.</p>
+        <p class="body-text">Currently the nervous or frustration points are during payment 1/2 mainly due to unawareness about what comes next in the flow to do.</p>
+      </div>
+      <div></div>
+    </div>
+    <img src="assets/sp-journey-map.png" alt="User journey map and value mapping" class="section-img">
+  </div>
+</div>
+
+<!-- ═══════════════════════ MARKET RESEARCH ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <h2 class="section-title blue">Market Research</h2>
+    <p style="color:var(--ink-muted); margin-bottom:32px;">Split-payment experience</p>
+
+    <h3 class="sub-title">Benchmarking</h3>
+    <p class="body-text">Benchmarking in competitor studies allows businesses to evaluate their performance against peers. A thorough market study provided insights into user cognitive biases when transitioning to our platform and highlighted the competitive offerings shaping user expectations. This analysis identified key strengths and weaknesses of current and potential competitors, uncovering gaps in the market.</p>
+
+    <img src="assets/sp-market-research.png" alt="Competitor benchmarking table and analysis" class="section-img">
+
+    <div class="callout mt-32">
+      <p><strong>Interpretation:</strong> This will brief about the analysis and hypothesis drawn from the discovery phase. Framing design brief, goals, objective before jumping into sketching for the concepts.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ INSIGHTS ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <h2 class="section-title blue">Insights</h2>
+    <p style="color:var(--ink-muted); margin-bottom:32px;">Research perceptions</p>
+
+    <div class="two-col" style="align-items:start;">
+      <div>
+        <h3 class="sub-title">Problem Areas | Current website</h3>
+        <p class="italic-label">based on user interaction and research</p>
+        <div class="problem-list">
+          <div class="problem-item">
+            <div class="p-num">1. Content prioritization</div>
+            <div class="p-title">Lack of Visual Hierarchy</div>
+          </div>
+          <div class="problem-item">
+            <div class="p-num">2. Upfront user interface</div>
+            <div class="p-title">The user has no chance to grasp the next step.</div>
+          </div>
+          <div class="problem-item">
+            <div class="p-num">3. User experience flow</div>
+            <div class="p-title">Repetitive steps with increased cognitive load.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <img src="assets/sp-insights.png" alt="Problem areas on current website" class="section-img mb-0" style="margin:0; border-radius:8px;">
+      </div>
+    </div>
+
+    <div class="insight-3col mt-32">
+      <div class="insight-block">
+        <h4>Product</h4>
+        <ul>
+          <li>The current split payment flow has critical usability issues, including <b>lack of clarity, repetitive steps, and poorly organized content</b>, which leave users uncertain and increase error likelihood.</li>
+          <li>Key elements like financing links appear non-clickable, and the <b>layout fails to highlight the importance of split payment options</b>, potentially reducing engagement and impacting revenue.</li>
+          <li>Optimizing the flow with clear titles, feedback mechanisms, and streamlined steps can significantly improve user experience and business outcomes.</li>
+        </ul>
+      </div>
+      <div class="insight-block">
+        <h4>User</h4>
+        <ul>
+          <li>Users prioritize a smooth, quick checkout experience but often <b>feel anxious during payments</b>.</li>
+          <li>Errors reduce order completion, and users value clear content, split-pay options, and financing.</li>
+          <li>However, the <b>lack of upfront clarity</b> makes understanding split payments overwhelming.</li>
+        </ul>
+      </div>
+      <div class="insight-block">
+        <h4>Market</h4>
+        <ul>
+          <li>Market research reveals that split payment is a relatively new feature, with <b>limited adoption among competitors</b>—only one competitor company currently offers both split payment and financing options.</li>
+          <li>Most websites use a stepper indicator for a <b>unified checkout experience</b>, making the process appear more straightforward.</li>
+          <li>Providing users with an <b>overview</b> of the payment process could significantly <b>enhance ease of use</b> and user satisfaction.</li>
+        </ul>
+      </div>
+    </div>
+
+    <img src="assets/sp-problem-areas.png" alt="Heuristic evaluation chart" class="section-img">
+  </div>
+</div>
+
+<!-- ═══════════════════════ RE-DESIGN BRIEF ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <h2 class="section-title">Re-design Brief</h2>
+    <p class="body-text">Re-designing split payment experience for US region which encourages the user to complete their purchase by adding 2 payments with optimized user experience.</p>
+
+    <div class="brief-3col">
+      <div class="brief-card">
+        <div class="bc-icon">🧠</div>
+        <h4>Hypothesis</h4>
+        <p>In current scenarios user tends to get lost during the flow which causes nervousness and errors. Not providing clarity makes the user go back and decreases the possibility of order completion.</p>
+      </div>
+      <div class="brief-card">
+        <div class="bc-icon">🖥️</div>
+        <h4>What we want to solve?</h4>
+        <p>Solving for user's current tendency of getting confused as there are multiple things to comprehend in the user flow for split payment. As a designer our challenge is to guide the user, decrease errors and provide smooth, understandable experience.</p>
+      </div>
+      <div class="brief-card">
+        <div class="bc-icon">🧩</div>
+        <h4>Design Creitera</h4>
+        <p>Providing a Unified Checkout Experience. To study and follow latest Design System. To improve split payment experience.</p>
+      </div>
+    </div>
+
+    <div class="goals-obj">
+      <div>
+        <h3 class="sub-title">Goals</h3>
+        <ul class="mt-16">
+          <li>Providing Unified Checkout experience.</li>
+          <li>Improving content priority, enabling users to focus on task at hand.</li>
+          <li>Simplifying split payment experience and user flow.</li>
+          <li>Allowing user to complete purchase during edge cases.</li>
+          <li>Enabling user to understand on going flow.</li>
+          <li>Provide better clarity of split payment experience.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="sub-title">Objective</h3>
+        <ul class="mt-16">
+          <li>Reducing the pain points in the user flow.</li>
+          <li>Increasing CSAT score with proposed improvements.</li>
+          <li>Enabling &amp; encouraging user to complete purchase during edge cases.</li>
+          <li>Reducing time for task completion.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ IDEATION ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <h2 class="section-title blue">Ideation</h2>
+    <p class="body-text">This will cover all the concepts and ideas that were brought to the table. And the process of reaching the final concept.</p>
+
+    <div class="two-col mt-32" style="align-items:start;">
+      <div>
+        <h3 class="sub-title">Mind-Mapping</h3>
+        <img src="assets/sp-ideation.png" alt="Mind mapping and component lists" class="section-img mb-0" style="margin:0; border-radius:8px;">
+      </div>
+      <div>
+        <h3 class="sub-title">Components &amp; feature lists</h3>
+        <div class="comp-grid mt-16" style="grid-template-columns:1fr 1fr;">
+          <div class="comp-col">
+            <h4>Primary</h4>
+            <ul>
+              <li>Payment Title</li>
+              <li>Promotional Texts</li>
+              <li>Split Payment Checkbox</li>
+              <li>Information Icon</li>
+              <li>Payment Options</li>
+              <li>CTA</li>
+            </ul>
+            <h4 class="mt-16">Split-payment</h4>
+            <ul>
+              <li>Payment 1 title</li>
+              <li>Payment 2 title</li>
+              <li>Amount to Apply</li>
+            </ul>
+          </div>
+          <div class="comp-col">
+            <h4>On-demand</h4>
+            <ul>
+              <li>Information Icon pop-up</li>
+              <li>Financing Information</li>
+              <li>Apply for Financing</li>
+              <li>Already Have financing CTA</li>
+              <li>Credit Card Information</li>
+              <li>Card Number</li>
+              <li>Card holder's Name</li>
+              <li>Expiration Date</li>
+              <li>CVV</li>
+              <li>"Submit" CTA</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-24">
+          <h3 class="sub-title">User Interface</h3>
+          <p class="body-text">The initial ideation process began with mind mapping to understand objectives, goals, and design briefs without constraints. This phase focused on creating a unified user experience, laying out checkout details on the left and other information on the right. The details were further refined using low-fidelity wireframes for clarity.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ WIREFRAMES ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <img src="assets/sp-wireframes.png" alt="Wireframes and payment section layout" class="section-img">
+  </div>
+</div>
+
+<!-- ═══════════════════════ INITIAL SKETCHES + ITERATIONS ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <h2 class="section-title">Initial Sketches</h2>
+    <img src="assets/sp-sketches-iterations.png" alt="Initial sketches and iterations" class="section-img">
+  </div>
+</div>
+
+<!-- ═══════════════════════ FINAL FLOW IDEATION ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <div class="two-col-3-2" style="align-items:start;">
+      <div>
+        <h2 class="section-title">Final Flow Ideation</h2>
+        <p class="body-text">The final iteration introduced a progress indicator within the split payment flow, dividing the process into three clear steps:</p>
+        <ol style="padding-left:22px; margin:12px 0 20px; font-size:15px; color:var(--ink-soft); line-height:2;">
+          <li>Adding the first payment.</li>
+          <li>Adding the second payment.</li>
+          <li>Applying the split amounts on a dedicated page.</li>
+        </ol>
+        <p class="body-text">The progress indicator serves as both a guide and an overview, highlighting the current step while providing feedback on completed steps. Detailed exploration refined the stepper's design, including content, titles, sizing, and spacing.</p>
+        <p class="body-text">The split amount page presents only one input field per payment, complemented by concise help text to clarify its purpose. A happy path was ideated to demonstrate the stepper's role in guiding users seamlessly through the flow, ensuring clarity and usability.</p>
+      </div>
+      <div>
+        <img src="assets/sp-final-flow.png" alt="Final flow ideation and stepper visuals" class="section-img mb-0" style="margin:0; border-radius:8px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ INITIAL PROPOSE + POST FEEDBACK ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <img src="assets/sp-initial-propose.png" alt="Initial propose and post-feedback improvements" class="section-img">
+  </div>
+</div>
+
+<!-- ═══════════════════════ FINAL PROTOTYPE ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <div class="two-col-3-2" style="align-items:center;">
+      <div>
+        <h2 class="section-title">Final Prototype</h2>
+        <p class="body-text">I started with Happy path prototyping where user does willful split payment with financing and credit card. This flow covers major improvements in terms of feature, flow, layout, guidance and clarity for the user. The user flow starts with user <strong>landing on payment section</strong> of checkout.</p>
+        <ul class="proto-steps">
+          <li>Once he <strong>clicks on the split payment checkbox</strong> a <strong>progress indicator/stepper</strong> is displayed.</li>
+          <li>The user <strong>chooses</strong> to pay with Financing as <strong>payment one</strong>. After completion flow, the user lands in payment section with <strong>added payment 1</strong>.</li>
+          <li>User <strong>adds payment 2</strong> as credit card. After security check for credit card, user is expected to do the last step of <strong>splitting the amount</strong>.</li>
+        </ul>
+        <p class="body-text mt-16">After which he can review and submit order.</p>
+      </div>
+      <div>
+        <img src="assets/sp-final-prototype.png" alt="Final prototype on laptop" class="section-img mb-0" style="margin:0; border-radius:8px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ WHAT'S NEW ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <img src="assets/sp-whats-new.png" alt="What's new and how it's better — before/after comparison" class="section-img">
+  </div>
+</div>
+
+<!-- ═══════════════════════ USER TESTING ═══════════════════════ -->
+<div class="section-light">
+  <div class="container">
+    <h2 class="section-title">Usability Testing</h2>
+    <p class="body-text">Usability testing is a technique used in user-centered interaction design to evaluate a product by testing it on users. This can be seen as an irreplaceable usability practice, since it gives direct input on how real users use the system. It is more concerned with the design intuitiveness of the product and tested with target audience.</p>
+
+    <div class="test-stats">
+      <div class="test-stat">
+        <div class="ts-val">10</div>
+        <div class="ts-lbl">Users</div>
+        <div class="ts-sub">Contributors</div>
+      </div>
+      <div class="test-stat">
+        <div class="ts-val">26–41</div>
+        <div class="ts-lbl">Age</div>
+        <div class="ts-sub">United States</div>
+      </div>
+      <div class="test-stat">
+        <div class="ts-val">6/10</div>
+        <div class="ts-lbl">Full rating</div>
+        <div class="ts-sub">scale of 7</div>
+      </div>
+      <div class="test-stat">
+        <div class="ts-val">8/10</div>
+        <div class="ts-lbl">Referred to stepper</div>
+        <div class="ts-sub">User flow</div>
+      </div>
+    </div>
+
+    <img src="assets/sp-usertesting.png" alt="User testing process and results" class="section-img">
+
+    <table class="hyp-table mt-32">
+      <thead>
+        <tr><th>Hypothesis</th><th>Observations</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Users required more clarity during split payment flow (Financing + CC)</td>
+          <td>4/10 users were guiding themselves through the stepper. 2/10 users referred stepper now and then.</td>
+        </tr>
+        <tr>
+          <td>Providing help text during split amount would be helpful.</td>
+          <td>2/10 users read the help text for understanding.</td>
+        </tr>
+        <tr>
+          <td>Breaking down steps of split payment would decrease the complexity in flow &amp; improve overall experience.</td>
+          <td>6/10 has the overall feedback to be very smooth, easy and helpful.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════ FUTURE SCOPE ═══════════════════════ -->
+<div class="section-white">
+  <div class="container">
+    <div class="two-col-3-2" style="align-items:center;">
+      <div>
+        <h2 class="section-title">Future Scope ✦</h2>
+        <ul class="future-list">
+          <li>Availability of sufficient <strong>time frame</strong> for the project could impact on better and deeper understanding.</li>
+          <li>Further <strong>real-time user testing</strong> could bring up new insights for further iterations.</li>
+          <li>There is scope to rethink project with other payment methods and <strong>combinations</strong>.</li>
+          <li>There is scope to iterate concept with a more <strong>unified flow approach</strong>.</li>
+          <li>There is scope to rethink project with having more than <strong>2+ payment</strong> methods for split payment.</li>
+        </ul>
+      </div>
+      <div>
+        <img src="assets/sp-final-prototype.png" alt="Final design on laptop" class="section-img mb-0" style="margin:0; border-radius:10px;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<div class="cs-footer">
+  <h3>Like what you see?</h3>
+  <p>More projects live in the portfolio — or let's connect directly.</p>
+  <a class="btn-back" href="index.html">← Back to Portfolio</a>
+</div>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.body.scrollHeight - window.innerHeight;
+    document.getElementById('progress').style.width = (scrolled / total * 100) + '%';
+  });
+</script>
+</body>
+</html>
