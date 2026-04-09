@@ -1349,7 +1349,7 @@
     function openAuraGame() {
       document.getElementById('aura-game-overlay').style.display = 'flex';
       document.body.style.overflow = 'hidden';
-      initGame();
+      window.initGame();
     }
     function closeAuraGame() {
       document.getElementById('aura-game-overlay').style.display = 'none';
@@ -1585,6 +1585,8 @@
     }
 
     function updateHintText() {
+      const el = document.getElementById('aura-hint-text');
+      if (!el) return;
       let txt = '';
       if (gameState === 'idle' || gameState === 'topdown') {
         txt = '<span class="aura-key">↑ ↓ ← →</span>Move &nbsp; <span class="aura-key">Esc</span>Close';
@@ -1593,7 +1595,7 @@
       } else if (gameState === 'dead') {
         txt = 'Click to restart or <span class="aura-key">Esc</span>Close';
       }
-      document.getElementById('aura-hint-text').innerHTML = txt;
+      el.innerHTML = txt;
     }
 
     function burst(x, y, color) {
