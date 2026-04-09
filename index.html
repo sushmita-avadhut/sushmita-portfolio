@@ -1423,538 +1423,886 @@
     </div>
   </div>
 
+
   <script>
   (function() {
     const canvas = document.getElementById('aura-canvas');
     const ctx    = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
-
     const W = canvas.width, H = canvas.height;
 
-    // Physics constants (from corridor mode)
-    const GRAVITY = 0.55;
-    const JUMP_V = -15;
-    const SPD_MAX = 7;
-    const CORRIDOR_SPEED_BASE = 3;
-
-    // Top-down constants
-    const TOPDOWN_SPD = 4;
-    const PLAYER_RAD = 24;
-    const WALL_THICK = 30;
-
-    // Corridor constants
-    const CORRIDOR_LEN = 1800;
+    /* ── PHYSICS ── */
+    const GRAVITY = 0.55, JUMP_V = -14, SPD_MAX = 7, BASE_SPEED = 3;
     const GROUND = H - 72;
+    const CORRIDOR_LEN = 1800;
+    const TOPDOWN_ACC = 0.6, TOPDOWN_FRIC = 0.82, TOPDOWN_MAX = 4.5;
 
-    // Color palette
+    /* ── SPRITES ── */
+    const dogImg = new Image(); dogImg.src = 'assets/dog-cursor.svg';
+    const catImg = new Image(); catImg.src = 'assets/cat-obstacle.svg';
+    const auraImg = new Image(); auraImg.src = 'assets/aura-dog.svg';
+    const stickerDance = new Image(); stickerDance.src = 'assets/sticker_dancing_t.svg';
+    const stickerLaptop = new Image(); stickerLaptop.src = 'assets/sticker_laptop_t.svg';
+    const stickerPuzzle = new Image(); stickerPuzzle.src = 'assets/sticker_puzzle_t.svg';
+
+    /* ── PALETTE ── */
     const C = {
-      purple: '#5B4FCF', coral: '#FF6B55', yellow: '#FFD60A',
-      ink: '#1A1824', muted: '#9A98A8', white: '#fff',
-      living_bg: '#F5E3C0', living_floor: '#D4A96A',
-      kitchen_bg: '#E8F0D8', kitchen_floor: '#C8B87A',
-      bedroom_bg: '#E0D0EC', bedroom_floor: '#9870B0',
-      hallway_bg: '#E8E0D8', hallway_floor: '#C8B8A8',
-      cat_orange: '#F4A460', dark: '#333'
+      purple: '#5B4FCF', purpleLight: '#EDEAFF',
+      coral: '#FF6B55', coralLight: '#FFF1EE',
+      yellow: '#FFD60A', yellowLight: '#FFF8CC',
+      mint: '#3ECFBC', mintLight: '#E6FAF7',
+      ink: '#1A1824', inkSoft: '#4C4A5A', muted: '#9A98A8',
+      white: '#fff', bg: '#F9F8F5', border: '#EDEAE3',
+      wallDark: '#5A4E3C', wallMid: '#7A6E5C', floorWood: '#C4A56A',
     };
 
-    // Room definitions
+    /* ── ROOMS ── */
+    const FURNITURE = {
+      living: [
+        { type:'sofa',   x:100, y:100, w:180, h:60 },
+        { type:'table',  x:340, y:180, w:80,  h:50 },
+        { type:'lamp',   x:800, y: 90, w:30,  h:30 },
+        { type:'rug',    x:300, y:240, w:200, h:120 },
+      ],
+      kitchen: [
+        { type:'counter', x:60,  y: 80, w:260, h:40 },
+        { type:'table',   x:500, y:200, w:100, h:70 },
+        { type:'fridge',  x:820, y: 80, w:50,  h:70 },
+      ],
+      bedroom: [
+        { type:'bed',      x:120, y:120, w:200, h:120 },
+        { type:'wardrobe', x:780, y: 80, w:70,  h:100 },
+        { type:'rug',      x:450, y:250, w:160, h:100 },
+      ],
+    };
+
     const ROOMS = {
       living: {
-        name: 'Living Room',
-        bg: C.living_bg,
-        floor: C.living_floor,
-        exits: { right: { to: 'kitchen', corridor: 'living_kitchen' }, down: { to: 'bedroom', corridor: 'living_bedroom' } }
+        name: 'Living Room', bg: '#FBF4E4', floor: '#E8D5B0', wallColor: '#D4C4A0',
+        sticker: stickerDance, stickerPos: { x: 760, y: 300, s: 50 },
+        exits: { right: { to:'kitchen' }, down: { to:'bedroom' } },
+        catPaths: [
+          { y:160, minX:180, maxX:550, speed:1.8 },
+          { y:320, minX:500, maxX:830, speed:2.2 },
+        ],
+        treats: [ {x:400,y:200}, {x:650,y:140}, {x:200,y:310} ],
       },
       kitchen: {
-        name: 'Kitchen',
-        bg: C.kitchen_bg,
-        floor: C.kitchen_floor,
-        exits: { left: { to: 'living', corridor: 'living_kitchen' } }
+        name: 'Kitchen', bg: '#F0F4E8', floor: '#D8E0C0', wallColor: '#C0C8A0',
+        sticker: stickerLaptop, stickerPos: { x: 400, y: 300, s: 45 },
+        exits: { left: { to:'living' } },
+        catPaths: [
+          { y:200, minX:100, maxX:450, speed:2.0 },
+          { y:320, minX:400, maxX:780, speed:1.6 },
+        ],
+        treats: [ {x:350,y:160}, {x:700,y:280}, {x:150,y:300} ],
       },
       bedroom: {
-        name: 'Bedroom',
-        bg: C.bedroom_bg,
-        floor: C.bedroom_floor,
-        exits: { up: { to: 'living', corridor: 'living_bedroom' } }
-      }
+        name: 'Bedroom', bg: '#F0E8F4', floor: '#D8C8E0', wallColor: '#C0B0D0',
+        sticker: stickerPuzzle, stickerPos: { x: 500, y: 140, s: 45 },
+        exits: { up: { to:'living' } },
+        catPaths: [
+          { y:280, minX:100, maxX:700, speed:2.4 },
+          { y:180, minX:450, maxX:800, speed:1.5 },
+        ],
+        treats: [ {x:500,y:250}, {x:700,y:340}, {x:200,y:200} ],
+      },
     };
 
-    // Game state
-    let gameState = 'idle'; // idle, topdown, entering, corridor, exiting, dead
-    let currentRoom = 'living';
-    let nextRoom = null;
-    let nextCorridor = null;
+    /* ── EXIT ZONES ── */
+    const EXIT_ZONES = {
+      right: { x:910, y:165, w:50, h:90 },
+      left:  { x:0,   y:165, w:50, h:90 },
+      up:    { x:415, y:55,  w:130, h:50 },
+      down:  { x:415, y:375, w:130, h:50 },
+    };
+
+    /* ── GAME STATE ── */
+    let state = 'idle';  // idle | topdown | entering | corridor | exiting | dead
+    let currentRoom = 'living', nextRoom = null, exitDir = null;
     let score = 0, best = 0, frameN = 0;
     let transFrame = 0;
-
-    // Player
-    let player = { x: 450, y: 220, vx: 0, vy: 0, dir: 'right', jumps: 2 };
-
-    // Entities for current room/corridor
-    let entities = [];
-    let particles = [];
-
-    // Corridor-specific
-    let corridorProgress = 0;
-    let corridorSpeed = CORRIDOR_SPEED_BASE;
+    let corridorProgress = 0, corridorSpeed = BASE_SPEED;
     let corridorEntities = [];
+    let roomCats = [], roomTreats = [], particles = [];
+    let player = {};
+    let bobFrame = 0;
 
-    // Asset images
-    const dogImg = new Image();
-    dogImg.src = 'assets/dog-cursor.svg';
-    const catImg = new Image();
-    catImg.src = 'assets/cat-obstacle.svg';
+    const keys = { up:false, down:false, left:false, right:false };
 
-    // ── INIT ──
-    function initGame() {
-      best = parseInt(localStorage.getItem('aura_best') || '0');
-      score = 0;
-      frameN = 0;
-      currentRoom = 'living';
-      player = { x: 450, y: 220, vx: 0, vy: 0, dir: 'right', jumps: 2 };
-      gameState = 'idle';
-      updateHintText();
-      if (!initGame._looping) { initGame._looping = true; requestAnimationFrame(loop); }
-    }
-
-    function startPlay() {
-      score = 0;
-      frameN = 0;
-      currentRoom = 'living';
-      player = { x: 450, y: 220, vx: 0, vy: 0, dir: 'right', jumps: 2 };
-      gameState = 'topdown';
-      entities = createRoomEntities(currentRoom);
-      updateHintText();
-    }
-
-    // ── ROOM ENTITIES ──
-    function createRoomEntities(roomId) {
-      const ents = [];
-      // 2 patrolling cats per room
-      ents.push({ kind: 'cat', x: 100, y: 150, w: 24, h: 24, dir: 1, minX: 50, maxX: 350 });
-      ents.push({ kind: 'cat', x: 700, y: 300, w: 24, h: 24, dir: -1, minX: 600, maxX: 850 });
-      // 3 treats per room
-      ents.push({ kind: 'treat', x: 250, y: 200, w: 16, h: 16, collected: false });
-      ents.push({ kind: 'treat', x: 650, y: 180, w: 16, h: 16, collected: false });
-      ents.push({ kind: 'treat', x: 450, y: 300, w: 16, h: 16, collected: false });
-      return ents;
-    }
-
-    // ── INPUT ──
-    const keys = { up: false, down: false, left: false, right: false };
-    document.addEventListener('keydown', e => {
-      if (document.getElementById('aura-game-overlay').style.display === 'none') return;
-      const codes = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right' };
-      if (codes[e.code]) keys[codes[e.code]] = true;
-      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
-        e.preventDefault();
-        if (gameState === 'corridor' && player.jumps > 0) { player.vy = JUMP_V; player.jumps--; }
-        if (gameState === 'idle') startPlay();
-      }
-      if (e.code === 'Escape') closeAuraGame();
-    });
-    document.addEventListener('keyup', e => {
-      const codes = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right' };
-      if (codes[e.code]) keys[codes[e.code]] = false;
-    });
-
-    // Canvas clicks
-    canvas.addEventListener('click', e => {
-      if (gameState === 'corridor' && player.jumps > 0) { player.vy = JUMP_V; player.jumps--; }
-      if (gameState === 'idle' || gameState === 'dead') {
-        const r = canvas.getBoundingClientRect();
-        const mx = (e.clientX - r.left) * (W / r.width);
-        const my = (e.clientY - r.top) * (H / r.height);
-        if (mx > W/2-80 && mx < W/2+80 && my > H/2+30 && my < H/2+78) startPlay();
-      }
-    });
-
-    // ── HELPERS ──
-    function drawRoundedRect(x, y, w, h, r) {
+    /* ── HELPERS ── */
+    function rr(x,y,w,h,r) {
       ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.lineTo(x + w - r, y);
-      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-      ctx.lineTo(x + w, y + h - r);
-      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-      ctx.lineTo(x + r, y + h);
-      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-      ctx.lineTo(x, y + r);
-      ctx.quadraticCurveTo(x, y, x + r, y);
-      ctx.closePath();
+      ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+      ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r);
+      ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+      ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r);
+      ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
     }
-
+    function burst(x,y,color,n) {
+      for (let i=0;i<(n||10);i++)
+        particles.push({x,y,color,vx:(Math.random()-.5)*8,vy:Math.random()*-6-2,life:35+Math.random()*15,r:2+Math.random()*3});
+    }
+    function imgReady(img) { return img.complete && img.naturalWidth > 0; }
+    function circleCollide(ax,ay,ar,bx,by,br) {
+      const dx=ax-bx, dy=ay-by; return dx*dx+dy*dy < (ar+br)*(ar+br);
+    }
     function updateHintText() {
       const el = document.getElementById('aura-hint-text');
       if (!el) return;
-      let txt = '';
-      if (gameState === 'idle' || gameState === 'topdown') {
-        txt = '<span class="aura-key">↑ ↓ ← →</span>Move &nbsp; <span class="aura-key">Esc</span>Close';
-      } else if (gameState === 'corridor' || gameState === 'entering' || gameState === 'exiting') {
-        txt = '<span class="aura-key">← →</span>Move &nbsp; <span class="aura-key">Space</span>Jump ×2 &nbsp; <span class="aura-key">Esc</span>Close';
-      } else if (gameState === 'dead') {
-        txt = 'Click to restart or <span class="aura-key">Esc</span>Close';
+      const hints = {
+        idle:     '<span class="aura-key">Space</span>Start &nbsp; <span class="aura-key">Esc</span>Close',
+        topdown:  '<span class="aura-key">↑ ↓ ← →</span>Move &nbsp; <span class="aura-key">Esc</span>Close',
+        corridor: '<span class="aura-key">← →</span>Move &nbsp; <span class="aura-key">Space</span>Jump ×2 &nbsp; <span class="aura-key">Esc</span>Close',
+        dead:     '<span class="aura-key">Space</span>Retry &nbsp; <span class="aura-key">Esc</span>Close',
+      };
+      el.innerHTML = hints[state] || hints.topdown;
+    }
+    function updateScore() {
+      document.getElementById('aura-game-score').textContent =
+        'Score: ' + score + (best > 0 ? '  ·  Best: ' + best : '');
+    }
+    function saveBest() { if (score > best) { best = score; localStorage.setItem('aura_best', best); } }
+
+    /* ── INIT ── */
+    function initGame() {
+      best = parseInt(localStorage.getItem('aura_best') || '0');
+      state = 'idle'; score = 0; frameN = 0;
+      currentRoom = 'living';
+      player = { x:W/2, y:H/2, vx:0, vy:0, dir:'right', jumps:2 };
+      particles = [];
+      updateHintText(); updateScore();
+      if (!initGame._loop) { initGame._loop = true; requestAnimationFrame(loop); }
+    }
+
+    function enterRoom(roomId) {
+      currentRoom = roomId;
+      const R = ROOMS[roomId];
+      // spawn cats
+      roomCats = R.catPaths.map(p => ({
+        x: p.minX + Math.random()*(p.maxX - p.minX),
+        y: p.y, dir: Math.random()>0.5?1:-1,
+        minX: p.minX, maxX: p.maxX, speed: p.speed,
+      }));
+      // spawn treats
+      roomTreats = R.treats.map(t => ({ x:t.x, y:t.y, collected:false, timer:0 }));
+      particles = [];
+    }
+
+    function startPlay() {
+      score = 0; frameN = 0;
+      enterRoom('living');
+      // place player in center of room
+      player = { x:W/2, y:H/2+20, vx:0, vy:0, dir:'right', jumps:2 };
+      state = 'topdown';
+      updateHintText();
+    }
+
+    /* ── INPUT ── */
+    document.addEventListener('keydown', e => {
+      if (document.getElementById('aura-game-overlay').style.display === 'none') return;
+      const map = {ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',KeyW:'up',KeyS:'down',KeyA:'left',KeyD:'right'};
+      if (map[e.code]) keys[map[e.code]] = true;
+      if (e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW') {
+        e.preventDefault();
+        if (state==='corridor' && player.jumps>0) { player.vy=JUMP_V; player.jumps--; }
+        if (state==='idle'||state==='dead') startPlay();
       }
-      el.innerHTML = txt;
-    }
+      if (e.code==='Escape') closeAuraGame();
+    });
+    document.addEventListener('keyup', e => {
+      const map = {ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',KeyW:'up',KeyS:'down',KeyA:'left',KeyD:'right'};
+      if (map[e.code]) keys[map[e.code]] = false;
+    });
+    canvas.addEventListener('click', e => {
+      if (state==='corridor' && player.jumps>0) { player.vy=JUMP_V; player.jumps--; return; }
+      if (state==='idle'||state==='dead') startPlay();
+    });
 
-    function burst(x, y, color) {
-      for (let i = 0; i < 8; i++) {
-        particles.push({ x, y, color, vx: (Math.random()-0.5)*6, vy: Math.random()*-5-1, life: 38 });
-      }
-    }
-
-    function aabbCollide(a, b) {
-      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-    }
-
-    // ── UPDATE ──
+    /* ══════════════════════════════════════════
+       UPDATE
+    ══════════════════════════════════════════ */
     function update() {
-      frameN++;
-      if (gameState === 'idle') {
-        updateHintText();
-      } else if (gameState === 'topdown') {
-        updateTopdown();
-      } else if (gameState === 'corridor') {
-        updateCorridor();
-      } else if (gameState === 'entering' || gameState === 'exiting') {
+      frameN++; bobFrame++;
+      // particles always update
+      for (const p of particles) { p.x+=p.vx; p.y+=p.vy; p.vy+=0.25; p.life--; }
+      particles = particles.filter(p => p.life > 0);
+
+      if (state==='topdown') updateTopdown();
+      else if (state==='corridor') updateCorridor();
+      else if (state==='entering'||state==='exiting') {
         transFrame++;
-        if (transFrame === 10) {
-          if (gameState === 'entering') gameState = 'corridor';
-          else gameState = 'topdown';
-        }
-        if (transFrame === 20) {
+        if (transFrame>=24) {
           transFrame = 0;
-          if (gameState === 'corridor') corridorStart();
-          else if (gameState === 'topdown') {
-            currentRoom = nextRoom;
-            entities = createRoomEntities(currentRoom);
-            nextRoom = null;
-          }
+          if (state==='entering') { state='corridor'; corridorStart(); }
+          else { state='topdown'; enterRoom(nextRoom); placePlayerFromExit(); nextRoom=null; }
+          updateHintText();
         }
-      } else if (gameState === 'dead') {
-        updateHintText();
       }
+    }
+
+    function placePlayerFromExit() {
+      // place player at the opposite side of where they'll arrive
+      if (exitDir==='right') player = {x:80,y:H/2,vx:0,vy:0,dir:'right',jumps:2};
+      else if (exitDir==='left') player = {x:W-80,y:H/2,vx:0,vy:0,dir:'left',jumps:2};
+      else if (exitDir==='down') player = {x:W/2,y:100,vx:0,vy:0,dir:'down',jumps:2};
+      else player = {x:W/2,y:H-100,vx:0,vy:0,dir:'up',jumps:2};
     }
 
     function updateTopdown() {
-      // Player movement
-      let vx = 0, vy = 0;
-      if (keys.left) vx = -TOPDOWN_SPD;
-      if (keys.right) vx = TOPDOWN_SPD;
-      if (keys.up) vy = -TOPDOWN_SPD;
-      if (keys.down) vy = TOPDOWN_SPD;
-      player.vx += vx * 0.2;
-      player.vy += vy * 0.2;
-      player.vx *= 0.85;
-      player.vy *= 0.85;
-      player.x += player.vx;
-      player.y += player.vy;
+      // movement
+      if (keys.left)  player.vx -= TOPDOWN_ACC;
+      if (keys.right) player.vx += TOPDOWN_ACC;
+      if (keys.up)    player.vy -= TOPDOWN_ACC;
+      if (keys.down)  player.vy += TOPDOWN_ACC;
+      player.vx *= TOPDOWN_FRIC;
+      player.vy *= TOPDOWN_FRIC;
+      if (Math.abs(player.vx) > TOPDOWN_MAX) player.vx = TOPDOWN_MAX * Math.sign(player.vx);
+      if (Math.abs(player.vy) > TOPDOWN_MAX) player.vy = TOPDOWN_MAX * Math.sign(player.vy);
 
-      // Update direction
-      if (player.vx < -0.5) player.dir = 'left';
-      if (player.vx > 0.5) player.dir = 'right';
-      if (player.vy < -0.5) player.dir = 'up';
-      if (player.vy > 0.5) player.dir = 'down';
+      // direction for sprite flip
+      if (Math.abs(player.vx) > 0.5) player.dir = player.vx > 0 ? 'right' : 'left';
 
-      // Boundary
-      player.x = Math.max(PLAYER_RAD, Math.min(900 - PLAYER_RAD, player.x));
-      player.y = Math.max(PLAYER_RAD + WALL_THICK, Math.min(380 - PLAYER_RAD, player.y));
+      const nx = player.x + player.vx, ny = player.y + player.vy;
 
-      // Check exit collisions
+      // furniture collision
+      const PR = 20; // player collision radius
+      const furn = FURNITURE[currentRoom] || [];
+      let blockedX = false, blockedY = false;
+      for (const f of furn) {
+        if (f.type === 'rug') continue; // walk over rugs
+        const pad = 4;
+        if (nx-PR < f.x+f.w+pad && nx+PR > f.x-pad && player.y-PR < f.y+f.h+pad && player.y+PR > f.y-pad) blockedX = true;
+        if (player.x-PR < f.x+f.w+pad && player.x+PR > f.x-pad && ny-PR < f.y+f.h+pad && ny+PR > f.y-pad) blockedY = true;
+      }
+
+      if (!blockedX) player.x = nx;
+      if (!blockedY) player.y = ny;
+
+      // wall clamp (but allow exit zones)
       const room = ROOMS[currentRoom];
-      if (room.exits.right && player.x > 880 && player.y > 150 && player.y < 250) {
-        nextRoom = room.exits.right.to;
-        nextCorridor = room.exits.right.corridor;
-        gameState = 'entering';
-        transFrame = 0;
-        return;
+      const WL=40, WT=70, WR=W-40, WB=H-40;
+      let inExit = false;
+      for (const dir of Object.keys(room.exits)) {
+        const z = EXIT_ZONES[dir];
+        if (player.x > z.x && player.x < z.x+z.w && player.y > z.y && player.y < z.y+z.h) inExit = true;
       }
-      if (room.exits.left && player.x < 40 && player.y > 150 && player.y < 250) {
-        nextRoom = room.exits.left.to;
-        nextCorridor = room.exits.left.corridor;
-        gameState = 'entering';
-        transFrame = 0;
-        return;
-      }
-      if (room.exits.up && player.y < 40 && player.x > 380 && player.x < 520) {
-        nextRoom = room.exits.up.to;
-        nextCorridor = room.exits.up.corridor;
-        gameState = 'entering';
-        transFrame = 0;
-        return;
-      }
-      if (room.exits.down && player.y > 380 && player.x > 380 && player.x < 520) {
-        nextRoom = room.exits.down.to;
-        nextCorridor = room.exits.down.corridor;
-        gameState = 'entering';
-        transFrame = 0;
-        return;
+      if (!inExit) {
+        player.x = Math.max(WL+PR, Math.min(WR-PR, player.x));
+        player.y = Math.max(WT+PR, Math.min(WB-PR, player.y));
       }
 
-      // Entity updates
-      frameN % 60 === 0 && (score++);
-      for (const e of entities) {
-        if (e.kind === 'cat') {
-          e.x += e.dir * 2;
-          if (e.x < e.minX || e.x > e.maxX) e.dir *= -1;
-          if (aabbCollide(player, e)) { gameState = 'dead'; burst(player.x, player.y, C.coral); }
-        } else if (e.kind === 'treat' && !e.collected) {
-          if (aabbCollide(player, e)) { e.collected = true; score += 10; burst(e.x, e.y, C.yellow); }
+      // exit detection
+      for (const [dir, exit] of Object.entries(room.exits)) {
+        const z = EXIT_ZONES[dir];
+        if (player.x > z.x && player.x < z.x+z.w && player.y > z.y && player.y < z.y+z.h) {
+          const atEdge = (dir==='right'&&player.x>W-20)||(dir==='left'&&player.x<20)||
+                         (dir==='down'&&player.y>H-20)||(dir==='up'&&player.y<60);
+          if (atEdge) {
+            nextRoom = exit.to; exitDir = dir;
+            state = 'entering'; transFrame = 0;
+            updateHintText(); return;
+          }
         }
       }
 
-      updateHintText();
-      document.getElementById('aura-game-score').textContent = 'Score: ' + score + (best > 0 ? '  ·  Best: ' + best : '');
+      // cat patrol
+      for (const c of roomCats) {
+        c.x += c.dir * c.speed;
+        if (c.x < c.minX) { c.x = c.minX; c.dir = 1; }
+        if (c.x > c.maxX) { c.x = c.maxX; c.dir = -1; }
+        if (circleCollide(player.x, player.y, PR, c.x, c.y, 16)) {
+          state = 'dead'; saveBest();
+          burst(player.x, player.y, C.coral, 16);
+          updateHintText(); return;
+        }
+      }
+
+      // treat collection
+      for (const t of roomTreats) {
+        if (t.collected) continue;
+        if (circleCollide(player.x, player.y, PR, t.x, t.y, 14)) {
+          t.collected = true; score += 10;
+          burst(t.x, t.y, C.yellow, 12);
+        }
+      }
+
+      if (frameN % 60 === 0) score++;
+      updateScore();
     }
 
     function corridorStart() {
       corridorProgress = 0;
-      corridorSpeed = CORRIDOR_SPEED_BASE;
+      corridorSpeed = BASE_SPEED;
       corridorEntities = [];
-      player = { x: 200, y: GROUND, vx: 0, vy: 0, dir: 'right', jumps: 2 };
+      player = { x:120, y:GROUND, vx:0, vy:0, dir:'right', jumps:2 };
       particles = [];
     }
 
     function updateCorridor() {
-      // Player input
-      if (keys.left) player.vx = Math.max(player.vx - 1, -5.5);
-      else if (keys.right) player.vx = Math.min(player.vx + 1, 5.5);
+      // horizontal
+      if (keys.left) player.vx = Math.max(player.vx-1, -5.5);
+      else if (keys.right) player.vx = Math.min(player.vx+1, 5.5);
       else player.vx *= 0.72;
-      player.x = Math.max(8, Math.min(W - 48, player.x + player.vx));
+      player.x = Math.max(8, Math.min(W-60, player.x+player.vx));
 
-      // Gravity
+      // gravity
       player.vy += GRAVITY;
       player.y += player.vy;
-      if (player.y >= GROUND) { player.y = GROUND; player.vy = 0; player.jumps = 2; }
+      if (player.y >= GROUND) { player.y=GROUND; player.vy=0; player.jumps=2; }
 
-      // Progress
+      // scroll
       corridorProgress += corridorSpeed;
-      corridorSpeed = Math.min(SPD_MAX, CORRIDOR_SPEED_BASE + frameN / 900);
+      corridorSpeed = Math.min(SPD_MAX, BASE_SPEED + frameN/1000);
 
-      // Spawn entities
-      const spawnGap = Math.max(40, 100 - frameN / 50);
-      if (frameN % Math.round(spawnGap) === 0) {
-        if (Math.random() > 0.4) {
-          corridorEntities.push({ kind: 'treat', x: W + 10, y: Math.random() > 0.5 ? GROUND - 60 : GROUND, w: 12, h: 12 });
+      // spawn
+      const gap = Math.max(38, 90 - corridorProgress/30);
+      if (frameN % Math.round(gap) === 0) {
+        if (Math.random() > 0.35) {
+          const aerial = Math.random() > 0.5;
+          corridorEntities.push({ kind:'treat', x:W+20, y:aerial?GROUND-80:GROUND, w:20, h:20 });
         } else {
-          const tall = Math.random() > 0.5;
-          corridorEntities.push({ kind: 'cat', x: W + 10, y: GROUND, w: tall ? 30 : 38, h: tall ? 58 : 42 });
+          const big = Math.random() > 0.5;
+          corridorEntities.push({ kind:'cat', x:W+20, y:GROUND, w:big?40:34, h:big?56:40 });
         }
       }
 
-      // Update entities
       for (const e of corridorEntities) e.x -= corridorSpeed;
 
-      // Collisions
-      const px = player.x + 8, py = player.y - 48 + 8, pw = 32, ph = 48 - 16;
+      // collisions (forgiving hitbox)
+      const px=player.x+12, py=player.y-68, pw=36, ph=56;
       for (const e of corridorEntities) {
-        const ex = e.x, ey = e.y - e.h, ew = e.w, eh = e.h;
-        if (px < ex+ew && px+pw > ex && py < ey+eh && py+ph > ey) {
-          if (e.kind === 'treat') { e.done = true; score += 10; burst(e.x + e.w/2, e.y - e.h/2, C.yellow); }
-          else { e.done = true; gameState = 'dead'; burst(player.x + 16, player.y - 24, C.coral); if (score > best) { best = score; localStorage.setItem('aura_best', best); } }
+        if (e.done) continue;
+        const ex=e.x, ey=e.y-e.h, ew=e.w, eh=e.h;
+        if (px<ex+ew && px+pw>ex && py<ey+eh && py+ph>ey) {
+          if (e.kind==='treat') {
+            e.done=true; score+=10; burst(e.x+e.w/2, e.y-e.h/2, C.yellow, 8);
+          } else {
+            e.done=true; state='dead'; saveBest();
+            burst(player.x+20, player.y-40, C.coral, 16);
+            updateHintText(); return;
+          }
         }
       }
-      corridorEntities = corridorEntities.filter(e => !e.done && e.x > -50);
+      corridorEntities = corridorEntities.filter(e => !e.done && e.x > -60);
 
-      // Particles
-      for (const p of particles) { p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--; }
-      particles = particles.filter(p => p.life > 0);
-
-      // Corridor end
+      // corridor complete
       if (corridorProgress >= CORRIDOR_LEN) {
-        score += 50;
-        gameState = 'exiting';
-        transFrame = 0;
+        score += 50; state='exiting'; transFrame=0;
+        burst(player.x, player.y-40, C.purple, 20);
+        updateHintText();
       }
 
-      frameN % 60 === 0 && (score++);
-      updateHintText();
-      document.getElementById('aura-game-score').textContent = 'Score: ' + score + (best > 0 ? '  ·  Best: ' + best : '');
+      if (frameN%60===0) score++;
+      updateScore();
     }
 
-    // ── DRAW ──
+    /* ══════════════════════════════════════════
+       DRAW
+    ══════════════════════════════════════════ */
     function draw() {
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, W, H);
-
-      if (gameState === 'idle') drawIdle();
-      else if (gameState === 'topdown') drawTopdown();
-      else if (gameState === 'corridor') drawCorridor();
-      else if (gameState === 'entering' || gameState === 'exiting') drawTransition();
-      else if (gameState === 'dead') drawDead();
+      ctx.save();
+      if (state==='idle') drawIdle();
+      else if (state==='topdown') drawTopdown();
+      else if (state==='corridor') drawCorridor();
+      else if (state==='entering'||state==='exiting') drawTransition();
+      else if (state==='dead') drawDead();
+      ctx.restore();
     }
 
+    /* ── DRAW: IDLE ── */
     function drawIdle() {
-      // Draw living room background
-      const room = ROOMS.living;
-      ctx.fillStyle = room.bg;
-      ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = room.floor;
-      ctx.fillRect(WALL_THICK, WALL_THICK + 100, W - WALL_THICK*2, H - WALL_THICK*2 - 100);
+      // warm room bg
+      ctx.fillStyle = '#FBF4E4';
+      ctx.fillRect(0,0,W,H);
+      // floor
+      ctx.fillStyle = '#E8D5B0';
+      ctx.fillRect(30,100,W-60,H-130);
+      // floor grain
+      ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+      ctx.lineWidth = 1;
+      for (let y=100;y<H-30;y+=18) { ctx.beginPath(); ctx.moveTo(30,y); ctx.lineTo(W-30,y); ctx.stroke(); }
 
-      // Title
-      ctx.fillStyle = C.ink;
-      ctx.font = 'bold 36px Plus Jakarta Sans, sans-serif';
+      // sticker decorations
+      const bob = Math.sin(bobFrame*0.03)*6;
+      if (imgReady(stickerDance)) ctx.drawImage(stickerDance, 80, 160+bob, 80, 80);
+      if (imgReady(stickerPuzzle)) ctx.drawImage(stickerPuzzle, W-170, 170-bob, 75, 75);
+      if (imgReady(auraImg)) ctx.drawImage(auraImg, W/2-50, H/2-100+bob*0.5, 100, 100);
+
+      // overlay card
+      ctx.fillStyle = 'rgba(26,24,36,0.75)';
+      rr(W/2-220, 40, 440, H-80, 24); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth=1.5;
+      rr(W/2-220, 40, 440, H-80, 24); ctx.stroke();
+
       ctx.textAlign = 'center';
-      ctx.fillText("Aura's House Run", W/2, 80);
 
-      ctx.font = '16px Plus Jakarta Sans, sans-serif';
-      ctx.fillStyle = C.muted;
-      ctx.fillText('Navigate the house · Collect treats · Avoid cats', W/2, 120);
+      // title
+      ctx.font = '800 32px Plus Jakarta Sans, sans-serif';
+      ctx.fillStyle = '#fff';
+      ctx.fillText("Aura's House Run", W/2, 110);
+
+      // subtitle
+      ctx.font = '400 14px Plus Jakarta Sans, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillText('Navigate rooms · Run through corridors · Collect treats', W/2, 145);
+
+      // Aura portrait
+      if (imgReady(dogImg)) {
+        ctx.save();
+        ctx.beginPath(); ctx.arc(W/2, 220, 55, 0, Math.PI*2); ctx.clip();
+        ctx.drawImage(dogImg, W/2-55, 165, 110, 110);
+        ctx.restore();
+        ctx.strokeStyle = C.purple; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.arc(W/2, 220, 55, 0, Math.PI*2); ctx.stroke();
+      }
+
+      // instructions
+      ctx.font = '500 12px DM Mono, monospace';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillText('🏠 Explore rooms from above', W/2, 300);
+      ctx.fillText('🏃 Run through corridors side-scroll', W/2, 322);
+      ctx.fillText('🦴 Collect treats · 😺 Avoid cats', W/2, 344);
 
       if (best > 0) {
-        ctx.font = 'bold 14px DM Mono, monospace';
-        ctx.fillStyle = C.purple;
-        ctx.fillText('Best Score: ' + best, W/2, 150);
+        ctx.font = '600 13px DM Mono, monospace';
+        ctx.fillStyle = C.yellow;
+        ctx.fillText('Best: ' + best, W/2, 372);
       }
 
-      // Start button
+      // start button
       ctx.fillStyle = C.purple;
-      drawRoundedRect(W/2-80, H/2+60, 160, 50, 15);
-      ctx.fill();
+      rr(W/2-70, H-100, 140, 44, 22); ctx.fill();
+      ctx.font = '700 15px Plus Jakarta Sans, sans-serif';
       ctx.fillStyle = '#fff';
-      ctx.font = 'bold 18px Plus Jakarta Sans, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Start', W/2, H/2+92);
+      ctx.fillText('Start Game 🐾', W/2, H-72);
+      ctx.textAlign = 'left';
     }
 
+    /* ── DRAW: TOPDOWN ── */
     function drawTopdown() {
-      const room = ROOMS[currentRoom];
-      ctx.fillStyle = room.bg;
-      ctx.fillRect(0, 0, W, H);
+      const R = ROOMS[currentRoom];
 
-      // Floor
-      ctx.fillStyle = room.floor;
-      ctx.fillRect(WALL_THICK, WALL_THICK + 40, W - WALL_THICK*2, H - WALL_THICK*2 - 40);
+      // bg
+      ctx.fillStyle = R.bg;
+      ctx.fillRect(0,0,W,H);
 
-      // Walls
-      ctx.strokeStyle = C.dark;
-      ctx.lineWidth = WALL_THICK;
-      ctx.strokeRect(WALL_THICK/2, WALL_THICK/2 + 40, W - WALL_THICK, H - WALL_THICK - 40);
+      // floor
+      ctx.fillStyle = R.floor;
+      ctx.fillRect(40, 70, W-80, H-110);
 
-      // Exits (doorways)
-      ctx.fillStyle = 'rgba(0,0,0,0.1)';
-      if (room.exits.right) ctx.fillRect(W - WALL_THICK, 180, WALL_THICK, 80);
-      if (room.exits.left) ctx.fillRect(0, 180, WALL_THICK, 80);
-      if (room.exits.up) ctx.fillRect(430, WALL_THICK + 40, 100, WALL_THICK);
-      if (room.exits.down) ctx.fillRect(430, H - WALL_THICK - 40, 100, WALL_THICK);
+      // floor planks
+      ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+      ctx.lineWidth = 1;
+      for (let y=70;y<H-40;y+=20) { ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(W-40,y); ctx.stroke(); }
 
-      // Room name
-      ctx.fillStyle = C.ink;
-      ctx.font = 'bold 14px Plus Jakarta Sans, sans-serif';
+      // walls
+      ctx.fillStyle = R.wallColor;
+      ctx.fillRect(0, 50, W, 20); // top
+      ctx.fillRect(0, H-40, W, 40); // bottom
+      ctx.fillRect(0, 50, 40, H-50); // left
+      ctx.fillRect(W-40, 50, 40, H-50); // right
+
+      // wall top edge (darker)
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      ctx.fillRect(0, 50, W, 4);
+
+      // room name banner
+      ctx.fillStyle = 'rgba(26,24,36,0.7)';
+      rr(W/2-80, 8, 160, 30, 15); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '600 12px Plus Jakarta Sans, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(room.name, W/2, 25);
+      ctx.fillText(R.name, W/2, 28);
+      ctx.textAlign = 'left';
 
-      // Entities
-      for (const e of entities) {
-        if (e.kind === 'cat') {
-          ctx.fillStyle = C.cat_orange;
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, 12, 0, Math.PI*2);
-          ctx.fill();
-          ctx.fillStyle = C.dark;
-          ctx.fillRect(e.x - 8, e.y - 12, 4, 4);
-          ctx.fillRect(e.x + 4, e.y - 12, 4, 4);
-        } else if (e.kind === 'treat' && !e.collected) {
-          ctx.fillStyle = C.yellow;
-          ctx.fillRect(e.x, e.y, e.w, e.h);
+      // exit doorways
+      for (const [dir, exit] of Object.entries(R.exits)) {
+        const z = EXIT_ZONES[dir];
+        // door frame
+        ctx.fillStyle = '#8B7355';
+        if (dir==='right') {
+          ctx.fillRect(W-42, z.y-4, 44, z.h+8);
+          ctx.fillStyle = '#3E2C1A'; ctx.fillRect(W-38, z.y, 40, z.h);
+          // arrow
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.font = '20px sans-serif'; ctx.textAlign='center';
+          ctx.fillText('→', W-18, z.y+z.h/2+7);
+        } else if (dir==='left') {
+          ctx.fillRect(-2, z.y-4, 44, z.h+8);
+          ctx.fillStyle = '#3E2C1A'; ctx.fillRect(-2, z.y, 40, z.h);
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.font = '20px sans-serif'; ctx.textAlign='center';
+          ctx.fillText('←', 18, z.y+z.h/2+7);
+        } else if (dir==='up') {
+          ctx.fillRect(z.x-4, 48, z.w+8, 26);
+          ctx.fillStyle = '#3E2C1A'; ctx.fillRect(z.x, 50, z.w, 22);
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.font = '20px sans-serif'; ctx.textAlign='center';
+          ctx.fillText('↑', z.x+z.w/2, 68);
+        } else {
+          ctx.fillRect(z.x-4, H-44, z.w+8, 46);
+          ctx.fillStyle = '#3E2C1A'; ctx.fillRect(z.x, H-40, z.w, 42);
+          ctx.fillStyle = 'rgba(255,255,255,0.6)';
+          ctx.font = '20px sans-serif'; ctx.textAlign='center';
+          ctx.fillText('↓', z.x+z.w/2, H-14);
+        }
+      }
+      ctx.textAlign = 'left';
+
+      // furniture
+      drawFurniture(currentRoom);
+
+      // sticker decoration
+      const st = R.stickerPos;
+      if (imgReady(R.sticker)) {
+        ctx.globalAlpha = 0.3;
+        ctx.drawImage(R.sticker, st.x, st.y, st.s, st.s);
+        ctx.globalAlpha = 1;
+      }
+
+      // treats
+      for (const t of roomTreats) {
+        if (t.collected) continue;
+        const tb = Math.sin(bobFrame*0.06 + t.x)*3;
+        drawBone(t.x-10, t.y-6+tb, 20, 12);
+      }
+
+      // cats (using actual sprite)
+      for (const c of roomCats) {
+        if (imgReady(catImg)) {
+          ctx.save();
+          if (c.dir < 0) { ctx.scale(-1,1); ctx.drawImage(catImg, -c.x-18, c.y-18, 36, 36); }
+          else ctx.drawImage(catImg, c.x-18, c.y-18, 36, 36);
+          ctx.restore();
+        } else {
+          ctx.fillStyle = '#F4A460';
+          ctx.beginPath(); ctx.arc(c.x, c.y, 14, 0, Math.PI*2); ctx.fill();
         }
       }
 
-      // Particles
-      for (const p of particles) {
-        ctx.globalAlpha = p.life / 38;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
+      // particles
+      drawParticles();
 
-      // Aura (simple circle with colors)
-      ctx.fillStyle = '#D4A574';
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, PLAYER_RAD, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = C.dark;
-      ctx.fillRect(player.x - 10, player.y - 10, 6, 6);
-      ctx.fillRect(player.x + 4, player.y - 10, 6, 6);
+      // player (Aura!)
+      const pBob = Math.sin(bobFrame*0.12)*2;
+      if (imgReady(dogImg)) {
+        ctx.save();
+        if (player.dir === 'left') {
+          ctx.scale(-1,1);
+          ctx.drawImage(dogImg, -player.x-28, player.y-28+pBob, 56, 56);
+        } else {
+          ctx.drawImage(dogImg, player.x-28, player.y-28+pBob, 56, 56);
+        }
+        ctx.restore();
+      } else {
+        ctx.fillStyle = '#D4A574';
+        ctx.beginPath(); ctx.arc(player.x, player.y, 22, 0, Math.PI*2); ctx.fill();
+      }
+
+      // player shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.beginPath(); ctx.ellipse(player.x, player.y+26, 20, 6, 0, 0, Math.PI*2); ctx.fill();
+
+      // score display on canvas
+      ctx.fillStyle = 'rgba(26,24,36,0.6)';
+      rr(10, 8, 100, 28, 14); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = '600 11px DM Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('🦴 ' + score, 60, 27);
+      ctx.textAlign = 'left';
     }
 
+    function drawFurniture(roomId) {
+      const furn = FURNITURE[roomId] || [];
+      for (const f of furn) {
+        switch(f.type) {
+          case 'sofa':
+            ctx.fillStyle = '#7B6B8A';
+            rr(f.x, f.y, f.w, f.h, 8); ctx.fill();
+            ctx.fillStyle = '#9484A4';
+            rr(f.x+8, f.y+8, f.w-16, f.h-20, 6); ctx.fill();
+            // cushions
+            ctx.fillStyle = '#A898B8';
+            rr(f.x+12, f.y+12, 50, f.h-28, 4); ctx.fill();
+            rr(f.x+68, f.y+12, 50, f.h-28, 4); ctx.fill();
+            rr(f.x+124, f.y+12, 50, f.h-28, 4); ctx.fill();
+            break;
+          case 'table':
+            ctx.fillStyle = '#A0845C';
+            rr(f.x, f.y, f.w, f.h, 4); ctx.fill();
+            ctx.fillStyle = '#B89870';
+            rr(f.x+4, f.y+4, f.w-8, f.h-8, 3); ctx.fill();
+            break;
+          case 'lamp':
+            ctx.fillStyle = '#E8D090';
+            ctx.beginPath(); ctx.arc(f.x+15, f.y+15, 15, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#FFE8A0';
+            ctx.beginPath(); ctx.arc(f.x+15, f.y+15, 8, 0, Math.PI*2); ctx.fill();
+            // glow
+            ctx.fillStyle = 'rgba(255,232,160,0.15)';
+            ctx.beginPath(); ctx.arc(f.x+15, f.y+15, 40, 0, Math.PI*2); ctx.fill();
+            break;
+          case 'rug':
+            ctx.fillStyle = 'rgba(91,79,207,0.12)';
+            rr(f.x, f.y, f.w, f.h, 12); ctx.fill();
+            ctx.strokeStyle = 'rgba(91,79,207,0.2)';
+            ctx.lineWidth = 2;
+            rr(f.x+10, f.y+10, f.w-20, f.h-20, 8); ctx.stroke();
+            break;
+          case 'counter':
+            ctx.fillStyle = '#8A9480';
+            rr(f.x, f.y, f.w, f.h, 3); ctx.fill();
+            ctx.fillStyle = '#A0AA96';
+            ctx.fillRect(f.x+2, f.y+2, f.w-4, f.h/2);
+            break;
+          case 'fridge':
+            ctx.fillStyle = '#B0B8C0';
+            rr(f.x, f.y, f.w, f.h, 4); ctx.fill();
+            ctx.fillStyle = '#C8D0D8';
+            rr(f.x+4, f.y+4, f.w-8, f.h/2-4, 3); ctx.fill();
+            rr(f.x+4, f.y+f.h/2+2, f.w-8, f.h/2-6, 3); ctx.fill();
+            // handle
+            ctx.fillStyle = '#888';
+            ctx.fillRect(f.x+f.w-10, f.y+12, 3, 16);
+            break;
+          case 'bed':
+            ctx.fillStyle = '#6A5A7A';
+            rr(f.x, f.y, f.w, f.h, 6); ctx.fill();
+            // blanket
+            ctx.fillStyle = '#E0D0F0';
+            rr(f.x+6, f.y+30, f.w-12, f.h-36, 4); ctx.fill();
+            // pillow
+            ctx.fillStyle = '#F0E8F8';
+            rr(f.x+20, f.y+8, 60, 22, 8); ctx.fill();
+            rr(f.x+100, f.y+8, 60, 22, 8); ctx.fill();
+            break;
+          case 'wardrobe':
+            ctx.fillStyle = '#7A6A50';
+            rr(f.x, f.y, f.w, f.h, 4); ctx.fill();
+            ctx.strokeStyle = '#5A4A30';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(f.x+f.w/2, f.y+4); ctx.lineTo(f.x+f.w/2, f.y+f.h-4); ctx.stroke();
+            // handles
+            ctx.fillStyle = '#C0A870';
+            ctx.beginPath(); ctx.arc(f.x+f.w/2-8, f.y+f.h/2, 3, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(f.x+f.w/2+8, f.y+f.h/2, 3, 0, Math.PI*2); ctx.fill();
+            break;
+        }
+        // shadow under furniture
+        if (f.type !== 'rug' && f.type !== 'lamp') {
+          ctx.fillStyle = 'rgba(0,0,0,0.06)';
+          ctx.beginPath();
+          ctx.ellipse(f.x+f.w/2, f.y+f.h+4, f.w/2*0.8, 4, 0, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+    }
+
+    /* ── DRAW: CORRIDOR ── */
     function drawCorridor() {
-      // Draw hallway background
-      ctx.fillStyle = '#E8E0D8';
-      ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = '#C8B8A8';
-      ctx.fillRect(0, GROUND, W, H - GROUND);
+      const scroll = corridorProgress * 0.5;
 
-      // Progress bar
+      // ceiling
+      const ceilGrad = ctx.createLinearGradient(0,0,0,80);
+      ceilGrad.addColorStop(0, '#5A4E3C');
+      ceilGrad.addColorStop(1, '#7A6E5C');
+      ctx.fillStyle = ceilGrad;
+      ctx.fillRect(0, 0, W, 80);
+
+      // ceiling beams
+      ctx.fillStyle = 'rgba(0,0,0,0.15)';
+      for (let x = -scroll%120; x < W+120; x += 120) {
+        ctx.fillRect(x, 0, 8, 80);
+      }
+
+      // wall
+      const wallGrad = ctx.createLinearGradient(0,80,0,GROUND);
+      wallGrad.addColorStop(0, '#D4C4A0');
+      wallGrad.addColorStop(1, '#E8D8B8');
+      ctx.fillStyle = wallGrad;
+      ctx.fillRect(0, 80, W, GROUND-80);
+
+      // wall wainscoting
+      ctx.fillStyle = '#C4B490';
+      ctx.fillRect(0, GROUND-50, W, 50);
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      ctx.fillRect(0, GROUND-50, W, 2);
+
+      // wall frames (scrolling decorations)
+      for (let x = 200 - scroll%400; x < W+200; x += 400) {
+        ctx.strokeStyle = '#B0A080';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, 120, 80, 60);
+        ctx.fillStyle = 'rgba(91,79,207,0.08)';
+        ctx.fillRect(x+2, 122, 76, 56);
+      }
+
+      // floor
+      ctx.fillStyle = '#A08060';
+      ctx.fillRect(0, GROUND, W, H-GROUND);
+      // floor planks
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+      ctx.lineWidth = 1;
+      for (let x = -scroll%60; x < W+60; x += 60) {
+        ctx.beginPath(); ctx.moveTo(x, GROUND); ctx.lineTo(x, H); ctx.stroke();
+      }
+      // floor highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fillRect(0, GROUND, W, 3);
+
+      // progress bar
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.fillRect(60, 20, W-120, 6);
+      rr(60, 20, W-120, 6, 3); ctx.fill();
       ctx.fillStyle = C.yellow;
-      ctx.fillRect(0, 0, W * Math.min(1, corridorProgress / CORRIDOR_LEN), 4);
+      const pw = (W-120) * Math.min(1, corridorProgress/CORRIDOR_LEN);
+      rr(60, 20, Math.max(6, pw), 6, 3); ctx.fill();
+      // progress label
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.font = '600 9px DM Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(Math.min(100, Math.round(corridorProgress/CORRIDOR_LEN*100)) + '%', W/2, 18);
+      ctx.textAlign = 'left';
 
-      // Entities
+      // corridor entities
       for (const e of corridorEntities) {
         if (e.kind === 'treat') {
-          ctx.fillStyle = C.yellow;
-          ctx.fillRect(e.x, e.y - e.h, e.w, e.h);
+          drawBone(e.x, e.y-e.h, e.w, e.h);
         } else {
-          ctx.fillStyle = C.cat_orange;
-          ctx.fillRect(e.x, e.y - e.h, e.w, e.h);
+          if (imgReady(catImg)) {
+            ctx.drawImage(catImg, e.x, e.y-e.h, e.w, e.h);
+          } else {
+            ctx.fillStyle = '#F4A460';
+            ctx.fillRect(e.x, e.y-e.h, e.w, e.h);
+          }
         }
       }
 
-      // Particles
-      for (const p of particles) {
-        ctx.globalAlpha = p.life / 38;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
-        ctx.fill();
+      // particles
+      drawParticles();
+
+      // player
+      const py = player.y - 70;
+      if (imgReady(dogImg)) {
+        ctx.save();
+        if (player.vx < -0.5) {
+          ctx.scale(-1,1);
+          ctx.drawImage(dogImg, -player.x-30, py, 60, 70);
+        } else {
+          ctx.drawImage(dogImg, player.x-30, py, 60, 70);
+        }
+        ctx.restore();
+      } else {
+        ctx.fillStyle = '#D4A574';
+        ctx.fillRect(player.x-25, py, 50, 70);
       }
-      ctx.globalAlpha = 1;
+      // player shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.beginPath();
+      ctx.ellipse(player.x, player.y+2, 22, 5, 0, 0, Math.PI*2);
+      ctx.fill();
 
-      // Player
-      ctx.fillStyle = '#D4A574';
-      ctx.fillRect(player.x - 24, player.y - 48, 48, 48);
-      ctx.fillStyle = C.dark;
-      ctx.fillRect(player.x - 18, player.y - 40, 6, 6);
-      ctx.fillRect(player.x + 12, player.y - 40, 6, 6);
+      // score overlay
+      ctx.fillStyle = 'rgba(26,24,36,0.5)';
+      rr(10, 10, 90, 26, 13); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = '600 11px DM Mono, monospace';
+      ctx.textAlign='center'; ctx.fillText('🦴 '+score, 55, 28); ctx.textAlign='left';
     }
 
+    /* ── DRAW: TRANSITION ── */
     function drawTransition() {
-      ctx.fillStyle = '#fff';
-      ctx.globalAlpha = Math.abs(10 - transFrame) / 10;
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
+      // draw current scene underneath
+      if (state==='entering') drawTopdown();
+      else drawCorridor();
+
+      // white flash
+      const t = transFrame / 24;
+      const alpha = t < 0.5 ? t*2 : 2-t*2;
+      ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
+      ctx.fillRect(0,0,W,H);
     }
 
+    /* ── DRAW: DEAD ── */
     function drawDead() {
-      ctx.fillStyle = 'rgba(0,0,0,0.4)';
-      ctx.fillRect(0, 0, W, H);
+      // draw last scene dimmed
+      ctx.fillStyle = '#1A1824';
+      ctx.fillRect(0,0,W,H);
 
-      const cw = 300, ch = 180, cx = W/2 - cw/2, cy = H/2 - ch/2;
-      ctx.fillStyle = 'rgba(10,30,10,0.9)';
-      ctx.fillRect(cx, cy, cw, ch);
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(cx, cy, cw, ch);
+      // scattered particles
+      drawParticles();
+
+      // card
+      const cw=340, ch=260, cx=W/2-cw/2, cy=H/2-ch/2;
+      ctx.fillStyle = 'rgba(40,36,50,0.95)';
+      rr(cx, cy, cw, ch, 24); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      rr(cx, cy, cw, ch, 24); ctx.stroke();
+
+      ctx.textAlign = 'center';
+
+      // sad Aura
+      if (imgReady(dogImg)) {
+        ctx.save();
+        ctx.globalAlpha = 0.6;
+        ctx.beginPath(); ctx.arc(W/2, cy+60, 35, 0, Math.PI*2); ctx.clip();
+        ctx.drawImage(dogImg, W/2-35, cy+25, 70, 70);
+        ctx.restore();
+      }
 
       ctx.fillStyle = C.coral;
-      ctx.font = 'bold 28px Plus Jakarta Sans, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Oops!', W/2, cy + 50);
+      ctx.font = '800 24px Plus Jakarta Sans, sans-serif';
+      ctx.fillText('Caught!', W/2, cy+118);
 
       ctx.fillStyle = '#fff';
-      ctx.font = '18px Plus Jakarta Sans, sans-serif';
-      ctx.fillText('Score: ' + score, W/2, cy + 90);
+      ctx.font = '700 32px Plus Jakarta Sans, sans-serif';
+      ctx.fillText(score, W/2, cy+158);
+      ctx.font = '500 12px DM Mono, monospace';
+      ctx.fillStyle = C.muted;
+      ctx.fillText('points', W/2, cy+176);
 
-      ctx.fillStyle = C.yellow;
-      ctx.font = 'bold 12px DM Mono, monospace';
-      ctx.fillText('Best: ' + best, W/2, cy + 120);
+      if (best > 0) {
+        ctx.fillStyle = C.yellow;
+        ctx.font = '600 13px DM Mono, monospace';
+        ctx.fillText('Best: ' + best, W/2, cy+200);
+      }
+
+      // retry button
+      ctx.fillStyle = C.purple;
+      rr(W/2-60, cy+ch-54, 120, 38, 19); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '700 14px Plus Jakarta Sans, sans-serif';
+      ctx.fillText('Try Again', W/2, cy+ch-30);
+      ctx.textAlign = 'left';
     }
 
-    // ── LOOP ──
+    /* ── DRAW: BONE TREAT ── */
+    function drawBone(x,y,w,h) {
+      const cx=x+w/2, cy=y+h/2, r=Math.min(w,h)*0.25;
+      ctx.fillStyle = '#F5E6C8';
+      // shaft
+      ctx.fillRect(x+r, cy-r*0.6, w-r*2, r*1.2);
+      // knobs
+      ctx.beginPath(); ctx.arc(x+r, cy-r*0.4, r, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+r, cy+r*0.4, r, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+w-r, cy-r*0.4, r, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+w-r, cy+r*0.4, r, 0, Math.PI*2); ctx.fill();
+      // highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillRect(x+r+2, cy-r*0.4, w-r*2-4, 2);
+    }
+
+    /* ── DRAW: PARTICLES ── */
+    function drawParticles() {
+      for (const p of particles) {
+        ctx.globalAlpha = Math.max(0, p.life / 50);
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r || 3, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    /* ── LOOP ── */
     function loop() {
       if (document.getElementById('aura-game-overlay').style.display !== 'none') {
         update(); draw();
