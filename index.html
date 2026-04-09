@@ -1570,6 +1570,20 @@
     });
 
     // ── HELPERS ──
+    function drawRoundedRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
     function updateHintText() {
       let txt = '';
       if (gameState === 'idle' || gameState === 'topdown') {
@@ -1795,11 +1809,11 @@
 
       // Start button
       ctx.fillStyle = C.purple;
-      ctx.beginPath();
-      ctx.roundRect(W/2-80, H/2+60, 160, 50, 15);
+      drawRoundedRect(W/2-80, H/2+60, 160, 50, 15);
       ctx.fill();
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 18px Plus Jakarta Sans, sans-serif';
+      ctx.textAlign = 'center';
       ctx.fillText('Start', W/2, H/2+92);
     }
 
