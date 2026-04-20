@@ -1800,16 +1800,31 @@
       // Draw room background
       ROOMS[roomIdx].drawBg(scrollX);
 
-      // Platforms
+      // Platforms — warm wooden shelves
       for(const pl of platforms){
         const px=pl.x-scrollX;
         if(px>W+10||px+pl.w<-10) continue;
-        ctx.fillStyle='#C4A56A';
-        ctx.fillRect(px, pl.y, pl.w, pl.h);
-        ctx.fillStyle='rgba(255,255,255,0.25)';
-        ctx.fillRect(px+2, pl.y, pl.w-4, 3);
-        ctx.fillStyle='rgba(0,0,0,0.10)';
-        ctx.fillRect(px, pl.y+pl.h, pl.w, 5);
+        // Shadow below shelf
+        ctx.fillStyle='rgba(0,0,0,0.14)';
+        rr(px+4, pl.y+pl.h+1, pl.w-2, 6, 3); ctx.fill();
+        // Shelf body
+        ctx.fillStyle='#B8926A';
+        rr(px, pl.y, pl.w, pl.h, 4); ctx.fill();
+        // Shelf top highlight
+        ctx.fillStyle='rgba(255,255,255,0.28)';
+        ctx.fillRect(px+4, pl.y+1, pl.w-8, 3);
+        // Wood grain lines
+        ctx.strokeStyle='rgba(0,0,0,0.07)'; ctx.lineWidth=1;
+        for(let gx=px+12; gx<px+pl.w-8; gx+=20){
+          ctx.beginPath(); ctx.moveTo(gx, pl.y+2); ctx.lineTo(gx, pl.y+pl.h-2); ctx.stroke();
+        }
+        // Shelf front lip
+        ctx.fillStyle='#A07850';
+        ctx.fillRect(px, pl.y+pl.h-4, pl.w, 4);
+        // Bracket hints on ends
+        ctx.fillStyle='#8A6440';
+        ctx.fillRect(px+4, pl.y, 5, pl.h+4);
+        ctx.fillRect(px+pl.w-9, pl.y, 5, pl.h+4);
       }
 
       // Entities
@@ -1917,149 +1932,511 @@
        ROOM BACKGROUNDS
     ════════════════════════════════════ */
 
-    function drawFloorAndWall(sky,floor,wall){
-      // ceiling/wall
-      ctx.fillStyle=wall; ctx.fillRect(0,0,W,H*0.22);
-      // background wall
-      const wg=ctx.createLinearGradient(0,H*0.22,0,FLOOR_Y);
-      wg.addColorStop(0,sky); wg.addColorStop(1,sky+'cc');
-      ctx.fillStyle=wg; ctx.fillRect(0,H*0.22,W,FLOOR_Y-H*0.22);
-      // floor
-      ctx.fillStyle=floor; ctx.fillRect(0,FLOOR_Y,W,H-FLOOR_Y);
-      // floor highlight
-      ctx.fillStyle='rgba(255,255,255,0.12)'; ctx.fillRect(0,FLOOR_Y,W,4);
+    /* ══════════ SHARED ROOM FOUNDATION ══════════ */
+    function drawRoomBase(wallColor, wallGrad1, wallGrad2, floorColor, floorGrad){
+      // Main wall gradient — warm & rich
+      const wg = ctx.createLinearGradient(0, 0, 0, FLOOR_Y);
+      wg.addColorStop(0, wallColor);
+      wg.addColorStop(0.55, wallGrad1);
+      wg.addColorStop(1, wallGrad2);
+      ctx.fillStyle = wg;
+      ctx.fillRect(0, 0, W, FLOOR_Y);
+
+      // Warm ambient light shaft from upper-right (like in ref image)
+      const lg = ctx.createRadialGradient(W*0.78, 0, 10, W*0.78, FLOOR_Y*0.5, W*0.55);
+      lg.addColorStop(0, 'rgba(255,220,140,0.18)');
+      lg.addColorStop(1, 'rgba(255,220,140,0)');
+      ctx.fillStyle = lg;
+      ctx.fillRect(0, 0, W, FLOOR_Y);
+
+      // Floor — rich warm wood
+      const fg = ctx.createLinearGradient(0, FLOOR_Y, 0, H);
+      fg.addColorStop(0, floorColor);
+      fg.addColorStop(1, floorGrad);
+      ctx.fillStyle = fg;
+      ctx.fillRect(0, FLOOR_Y, W, H - FLOOR_Y);
+
+      // Floor-wall junction (darker skirting board)
+      ctx.fillStyle = 'rgba(60,30,10,0.22)';
+      ctx.fillRect(0, FLOOR_Y - 6, W, 8);
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.fillRect(0, FLOOR_Y - 6, W, 2);
     }
 
-    /* Living Room */
-    function drawLivingRoom(scroll){
-      const R=ROOMS[0];
-      drawFloorAndWall(R.sky,R.floor,R.wall);
-
-      // Scrolling planks
-      ctx.strokeStyle='rgba(0,0,0,0.06)'; ctx.lineWidth=1;
-      for(let x=-scroll%80;x<W+80;x+=80){
-        ctx.beginPath(); ctx.moveTo(x,FLOOR_Y); ctx.lineTo(x,H); ctx.stroke();
+    function drawWoodFloor(scroll, plankW=90, col='rgba(0,0,0,0.055)'){
+      ctx.strokeStyle = col; ctx.lineWidth = 1;
+      for(let x = -(scroll % plankW); x < W + plankW; x += plankW){
+        ctx.beginPath(); ctx.moveTo(x, FLOOR_Y); ctx.lineTo(x, H); ctx.stroke();
       }
-
-      // Wall wainscoting
-      ctx.fillStyle='rgba(0,0,0,0.07)'; ctx.fillRect(0,H*0.22,W,8);
-      ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.fillRect(0,H*0.22,W,3);
-
-      // Scrolling picture frames
-      for(let x=220-scroll%350;x<W+220;x+=350){
-        ctx.strokeStyle='#B0A080'; ctx.lineWidth=2;
-        ctx.strokeRect(x,H*0.25,60,48);
-        ctx.fillStyle='rgba(91,79,207,0.10)'; ctx.fillRect(x+2,H*0.25+2,56,44);
+      // Cross planks every 3
+      ctx.strokeStyle = 'rgba(0,0,0,0.025)';
+      for(let x = -(scroll % (plankW*3)); x < W + plankW*3; x += plankW*3){
+        ctx.beginPath(); ctx.moveTo(x, FLOOR_Y+(H-FLOOR_Y)*0.33); ctx.lineTo(x+plankW*3,FLOOR_Y+(H-FLOOR_Y)*0.33); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, FLOOR_Y+(H-FLOOR_Y)*0.66); ctx.lineTo(x+plankW*3,FLOOR_Y+(H-FLOOR_Y)*0.66); ctx.stroke();
       }
-
-      // Sofa (fixed decoration near left)
-      const soff = -scroll*0.3 % (W+300);
-      drawSofa(80+soff, FLOOR_Y-68, R.accent, R.accent2);
     }
 
-    function drawSofa(x,y,c1,c2){
-      if(x+200 < 0 || x > W+10) return;
-      ctx.fillStyle=c1; rr(x,y,182,52,8); ctx.fill();
-      ctx.fillStyle=c2; rr(x+8,y+8,166,34,6); ctx.fill();
-      // cushions
-      ctx.fillStyle='rgba(255,255,255,0.15)';
-      [0,1,2].forEach(i=>{ rr(x+12+i*56,y+12,50,26,4); ctx.fill(); });
-      // legs
+    /* ── DECORATIVE RUG with geometric pattern (like ref image) ── */
+    function drawRug(rx, ry, rw, rh, c1, c2, c3){
+      if(rx + rw < 0 || rx > W) return;
+      ctx.save();
+      // Clip to rug rectangle slightly
+      ctx.beginPath(); rr(rx, ry, rw, rh, 6); ctx.clip();
+
+      // Base
+      ctx.fillStyle = c1; ctx.fillRect(rx, ry, rw, rh);
+
+      // Border band
+      ctx.strokeStyle = c2; ctx.lineWidth = 5;
+      rr(rx+8, ry+8, rw-16, rh-16, 4); ctx.stroke();
+      ctx.strokeStyle = c3; ctx.lineWidth = 2;
+      rr(rx+14, ry+14, rw-28, rh-28, 3); ctx.stroke();
+
+      // Central star / medallion
+      const cx2 = rx + rw/2, cy2 = ry + rh/2;
+      const pts = 8, outerR = Math.min(rw,rh)*0.28, innerR = outerR*0.55;
+      ctx.fillStyle = c2;
+      ctx.beginPath();
+      for(let i=0;i<pts*2;i++){
+        const a = (i*Math.PI/pts) - Math.PI/2;
+        const r2 = i%2===0 ? outerR : innerR;
+        i===0 ? ctx.moveTo(cx2+r2*Math.cos(a),cy2+r2*Math.sin(a))
+              : ctx.lineTo(cx2+r2*Math.cos(a),cy2+r2*Math.sin(a));
+      }
+      ctx.closePath(); ctx.fill();
+
+      // Inner star highlight
+      ctx.fillStyle = c3;
+      ctx.beginPath();
+      for(let i=0;i<pts*2;i++){
+        const a=(i*Math.PI/pts)-Math.PI/2;
+        const r2=i%2===0?outerR*0.5:innerR*0.4;
+        i===0?ctx.moveTo(cx2+r2*Math.cos(a),cy2+r2*Math.sin(a)):ctx.lineTo(cx2+r2*Math.cos(a),cy2+r2*Math.sin(a));
+      }
+      ctx.closePath(); ctx.fill();
+
+      // Floral corner accents
+      [[rx+28,ry+22],[rx+rw-28,ry+22],[rx+28,ry+rh-22],[rx+rw-28,ry+rh-22]].forEach(([fx,fy])=>{
+        ctx.fillStyle = c2;
+        ctx.beginPath(); ctx.arc(fx,fy,6,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = c3;
+        ctx.beginPath(); ctx.arc(fx,fy,3,0,Math.PI*2); ctx.fill();
+        // petals
+        for(let a=0;a<Math.PI*2;a+=Math.PI/2){
+          ctx.fillStyle = c2;
+          ctx.beginPath(); ctx.ellipse(fx+Math.cos(a)*9,fy+Math.sin(a)*9,5,3,a,0,Math.PI*2); ctx.fill();
+        }
+      });
+
+      ctx.restore();
+      // Shadow under rug
+      ctx.fillStyle = 'rgba(0,0,0,0.07)';
+      ctx.fillRect(rx+4, ry+rh, rw-8, 5);
+    }
+
+    /* ── LUSH INDOOR PLANT (like ref image: big leafy tropical) ── */
+    function drawPlant(px,py,scale=1){
+      if(px+120*scale<0||px>W+10) return;
+      ctx.save();
+      // Pot — terracotta
+      const pot_top = py, pot_h = 38*scale, pot_w = 52*scale;
+      ctx.fillStyle='#B86B3A';
+      ctx.beginPath();
+      ctx.moveTo(px-pot_w*0.38,pot_top+pot_h*0.18);
+      ctx.lineTo(px-pot_w*0.48,pot_top+pot_h);
+      ctx.lineTo(px+pot_w*0.48,pot_top+pot_h);
+      ctx.lineTo(px+pot_w*0.38,pot_top+pot_h*0.18);
+      ctx.closePath(); ctx.fill();
+      // pot rim
+      ctx.fillStyle='#CF7D4A';
+      rr(px-pot_w*0.4,pot_top,pot_w*0.8,pot_h*0.22,4); ctx.fill();
+      // soil
+      ctx.fillStyle='#4A2E18';
+      rr(px-pot_w*0.34,pot_top+pot_h*0.08,pot_w*0.68,pot_h*0.14,3); ctx.fill();
+
+      const stemY = pot_top - 6*scale;
+      // Large tropical leaves (bird-of-paradise / monstera style)
+      const leafData = [
+        {ang:-1.1, len:80, wid:22, col:'#2D6A35'},
+        {ang:-0.6, len:95, wid:25, col:'#246230'},
+        {ang:-1.5, len:70, wid:18, col:'#368040'},
+        {ang:0.15,  len:85, wid:24, col:'#1E5828'},
+        {ang:0.55,  len:75, wid:20, col:'#2A7035'},
+        {ang:-0.9, len:60, wid:16, col:'#3D8850', ox:10},
+      ];
+      leafData.forEach(({ang,len,wid,col,ox=0})=>{
+        ctx.save();
+        ctx.translate(px+ox*scale, stemY);
+        ctx.rotate(ang);
+        ctx.fillStyle=col;
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.bezierCurveTo(-wid*scale*0.5,-len*scale*0.45, -wid*scale*0.8,-len*scale*0.8, 0,-len*scale);
+        ctx.bezierCurveTo(wid*scale*0.8,-len*scale*0.8, wid*scale*0.5,-len*scale*0.45, 0,0);
+        ctx.fill();
+        // leaf mid-vein
+        ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=1.5*scale;
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-len*scale*0.88); ctx.stroke();
+        ctx.restore();
+      });
+      ctx.restore();
+    }
+
+    /* ── PICTURE FRAME on wall ── */
+    function drawPictureFrame(fx,fy,fw,fh,innerColor='#D0C8A0'){
+      if(fx+fw<0||fx>W) return;
+      // Frame border – warm wood color
+      ctx.fillStyle='#A0845A';
+      ctx.fillRect(fx,fy,fw,fh);
+      // Frame inner bevel
+      ctx.fillStyle='#C4A070';
+      ctx.fillRect(fx+5,fy+5,fw-10,fh-10);
+      // Painting inside
+      ctx.fillStyle=innerColor;
+      ctx.fillRect(fx+9,fy+9,fw-18,fh-18);
+      // Simple twig/branch painting (matches ref image)
+      ctx.strokeStyle='#5A3820'; ctx.lineWidth=2;
+      const mx=fx+fw/2, my=fy+fh/2;
+      ctx.beginPath();
+      ctx.moveTo(mx,fy+fh-12);
+      ctx.bezierCurveTo(mx,my+4,mx-8,my-8,mx-12,fy+12);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mx,my);
+      ctx.bezierCurveTo(mx+4,my-6,mx+14,my-14,mx+18,fy+12);
+      ctx.stroke();
+      // dots/berries
+      ctx.fillStyle='#8A4830';
+      [[mx-13,fy+14],[mx-8,fy+20],[mx+17,fy+14],[mx+12,fy+20]].forEach(([bx,by])=>{
+        ctx.beginPath(); ctx.arc(bx,by,2.5,0,Math.PI*2); ctx.fill();
+      });
+      // Frame shadow
+      ctx.fillStyle='rgba(0,0,0,0.12)';
+      ctx.fillRect(fx+fw,fy+4,5,fh);
+      ctx.fillRect(fx+4,fy+fh,fw,5);
+    }
+
+    /* ── LARGE WINDOW with garden view ── */
+    function drawWindow(wx2,wy2,ww,wh,scroll){
+      if(wx2+ww<0||wx2>W) return;
+      // Window bg – outside view
+      const sky2=ctx.createLinearGradient(wx2,wy2,wx2,wy2+wh);
+      sky2.addColorStop(0,'#A8C8E0'); sky2.addColorStop(0.55,'#C8E0B0'); sky2.addColorStop(1,'#78A860');
+      ctx.fillStyle=sky2; ctx.fillRect(wx2,wy2,ww,wh);
+      // outside trees (parallax slow)
+      const tx = ((-scroll*0.08)%200);
+      for(let i=0;i<3;i++){
+        const lx=wx2+(i*70)+tx;
+        ctx.fillStyle='#4A8040';
+        ctx.beginPath(); ctx.arc(lx+20,wy2+45,28,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#3A6830';
+        ctx.beginPath(); ctx.arc(lx+20,wy2+35,20,0,Math.PI*2); ctx.fill();
+      }
+      // Window frame – grid of panes
+      ctx.strokeStyle='#C4A070'; ctx.lineWidth=5;
+      ctx.strokeRect(wx2,wy2,ww,wh);
+      ctx.lineWidth=3;
+      // Vertical divider
+      ctx.beginPath(); ctx.moveTo(wx2+ww/2,wy2); ctx.lineTo(wx2+ww/2,wy2+wh); ctx.stroke();
+      // Horizontal dividers
+      ctx.beginPath(); ctx.moveTo(wx2,wy2+wh*0.33); ctx.lineTo(wx2+ww,wy2+wh*0.33); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(wx2,wy2+wh*0.66); ctx.lineTo(wx2+ww,wy2+wh*0.66); ctx.stroke();
+      // Glass highlight
+      ctx.fillStyle='rgba(255,255,255,0.12)';
+      ctx.fillRect(wx2+8,wy2+8,ww/2-14,wh*0.33-10);
+      // Light shaft from window
+      const lsh=ctx.createLinearGradient(wx2+ww*0.4,wy2+wh,wx2+ww*0.4+60,FLOOR_Y+20);
+      lsh.addColorStop(0,'rgba(255,220,140,0.18)');
+      lsh.addColorStop(1,'rgba(255,220,140,0)');
+      ctx.fillStyle=lsh;
+      ctx.beginPath();
+      ctx.moveTo(wx2,wy2+wh); ctx.lineTo(wx2+ww,wy2+wh);
+      ctx.lineTo(wx2+ww+80,FLOOR_Y+10); ctx.lineTo(wx2-20,FLOOR_Y+10);
+      ctx.fill();
+    }
+
+    /* ── RICH SOFA (dark green, deep cushions, like ref) ── */
+    function drawRichSofa(x,y,w=220){
+      if(x+w<0||x>W+20) return;
+      const h=70;
+      // Shadow
+      ctx.fillStyle='rgba(0,0,0,0.18)';
+      rr(x+6,y+h-2,w,12,6); ctx.fill();
+      // Main sofa body
+      ctx.fillStyle='#1E5030'; rr(x,y,w,h,10); ctx.fill();
+      // Sofa back pillow
+      ctx.fillStyle='#184228'; rr(x,y,w,h*0.42,10); ctx.fill();
+      // Seat cushions (3)
+      const cw=(w-20)/3;
+      for(let i=0;i<3;i++){
+        ctx.fillStyle=i%2===0?'#1E5030':'#246038';
+        rr(x+10+i*(cw+4),y+h*0.40,cw-2,h*0.55,7); ctx.fill();
+        // cushion highlight
+        ctx.fillStyle='rgba(255,255,255,0.08)';
+        rr(x+14+i*(cw+4),y+h*0.44,cw-10,8,4); ctx.fill();
+      }
+      // Throw pillows on top
+      [[x+18,y+4,28,30,'#F5E8C0'],[x+w-46,y+6,26,28,'#E8C890']].forEach(([px,py,pw,ph,pc])=>{
+        ctx.fillStyle=pc; rr(px,py,pw,ph,6); ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=1;
+        // weave lines
+        ctx.beginPath(); ctx.moveTo(px+pw/2,py+4); ctx.lineTo(px+pw/2,py+ph-4); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(px+4,py+ph/2); ctx.lineTo(px+pw-4,py+ph/2); ctx.stroke();
+      });
+      // Sofa legs
       ctx.fillStyle='#7A5A38';
-      [[x+10,y+50],[x+164,y+50]].forEach(([lx,ly])=>{ ctx.fillRect(lx,ly,10,14); });
+      [[x+12,y+h-2],[x+w-22,y+h-2]].forEach(([lx,ly])=>{
+        rr(lx,ly,10,14,3); ctx.fill();
+      });
     }
 
-    /* Kitchen */
+    /* ── SIDE TABLE with vase ── */
+    function drawSideTable(x,y){
+      if(x+60<0||x>W+10) return;
+      // table
+      ctx.fillStyle='#A0723A';
+      ctx.beginPath(); ctx.ellipse(x+22,y,22,6,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#8A5E2A'; ctx.fillRect(x+18,y,8,34);
+      // vase
+      ctx.fillStyle='#C4A06A'; rr(x+10,y-22,24,22,6); ctx.fill();
+      ctx.fillStyle='#D4B07A'; rr(x+12,y-22,20,8,4); ctx.fill();
+      // vase opening
+      ctx.fillStyle='rgba(0,0,0,0.18)';
+      ctx.beginPath(); ctx.ellipse(x+22,y-22,10,3,0,0,Math.PI*2); ctx.fill();
+    }
+
+    /* ══════════════════════════════
+       LIVING ROOM  (matches ref image)
+    ══════════════════════════════ */
+    function drawLivingRoom(scroll){
+      // Rich warm wall — terracotta / sandy beige
+      drawRoomBase('#C8955A','#D4A870','#B8946A','#8B6838','#5A3E20');
+
+      // Wood floor planks
+      drawWoodFloor(scroll, 88, 'rgba(0,0,0,0.07)');
+
+      // Wainscoting - lower wall panel
+      ctx.fillStyle='rgba(0,0,0,0.08)'; ctx.fillRect(0,FLOOR_Y-58,W,6);
+      ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(0,FLOOR_Y-58,W,2);
+
+      // Ceiling cornice
+      const cg=ctx.createLinearGradient(0,0,0,28);
+      cg.addColorStop(0,'rgba(40,20,0,0.22)'); cg.addColorStop(1,'rgba(40,20,0,0)');
+      ctx.fillStyle=cg; ctx.fillRect(0,0,W,28);
+
+      // ── LARGE WINDOW (right side, parallax slow) ──
+      const wOffX = -scroll*0.12;
+      drawWindow(W*0.62+wOffX%(W+300), H*0.04, 180, FLOOR_Y*0.8, scroll);
+
+      // ── PICTURE FRAME on wall (parallax mid) ──
+      for(let x=280-(scroll*0.35)%(W+400);x<W+200;x+=520){
+        drawPictureFrame(x, H*0.08, 68, 80, '#DDD0A0');
+      }
+
+      // ── SOFA (parallax mid) ──
+      for(let x=50-(scroll*0.28)%(W+350);x<W+260;x+=780){
+        drawRichSofa(x, FLOOR_Y-72, 220);
+      }
+
+      // ── SIDE TABLE next to sofa ──
+      for(let x=284-(scroll*0.28)%(W+350);x<W+100;x+=780){
+        drawSideTable(x, FLOOR_Y-30);
+      }
+
+      // ── PLANT (left of window — slow parallax) ──
+      for(let x=90-(scroll*0.15)%(W+300);x<W+120;x+=680){
+        drawPlant(x, FLOOR_Y-8, 1.15);
+      }
+
+      // ── AREA RUG (centered, slow parallax) ──
+      for(let x=180-(scroll*0.2)%(W+500);x<W+260;x+=700){
+        drawRug(x, FLOOR_Y-4, 260, H-FLOOR_Y+4, '#7A9EAA','#D4A84A','#E8C87A');
+      }
+    }
+
+    /* ══════════════════════════════
+       KITCHEN  (warm sage + tile)
+    ══════════════════════════════ */
     function drawKitchen(scroll){
-      const R=ROOMS[1];
-      drawFloorAndWall(R.sky,R.floor,R.wall);
+      drawRoomBase('#8EA884','#A0BC96','#7A9870','#6A8A58','#4A6A38');
+      drawWoodFloor(scroll, 50, 'rgba(0,0,0,0.06)');
 
-      // Tile floor
-      ctx.strokeStyle='rgba(0,0,0,0.05)'; ctx.lineWidth=1;
-      for(let x=-scroll%50;x<W+50;x+=50)
-        { ctx.beginPath(); ctx.moveTo(x,FLOOR_Y); ctx.lineTo(x,H); ctx.stroke(); }
-      for(let y=FLOOR_Y;y<H;y+=50)
-        { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+      // Tile floor grid
+      ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=1;
+      for(let y=FLOOR_Y;y<H;y+=50){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 
-      // Counter scrolling
-      for(let x=60-scroll%600;x<W+200;x+=600){
-        ctx.fillStyle='#8A9480'; rr(x,H*0.28,220,36,3); ctx.fill();
-        ctx.fillStyle='rgba(255,255,255,0.22)'; ctx.fillRect(x,H*0.28,220,4);
+      // Back wall shelf / counter
+      for(let x=-(scroll*0.3)%W;x<W+250;x+=650){
+        // Counter base
+        ctx.fillStyle='#7A9488'; rr(x+30,H*0.56,230,FLOOR_Y-H*0.56,0); ctx.fill();
+        ctx.fillStyle='#CDDDD0'; rr(x+26,H*0.56-6,238,14,3); ctx.fill();
+        // Counter highlight
+        ctx.fillStyle='rgba(255,255,255,0.22)'; ctx.fillRect(x+26,H*0.56-6,238,4);
+        // Upper cabinets
+        ctx.fillStyle='#8A9E8A'; rr(x+30,H*0.10,230,H*0.28,4); ctx.fill();
+        ctx.strokeStyle='#A0B4A0'; ctx.lineWidth=2;
+        [0,1,2].forEach(i=>{ rr(x+36+i*72,H*0.13,62,H*0.22,3); ctx.stroke(); });
+        // Cabinet handles
+        ctx.fillStyle='#C4A870';
+        [0,1,2].forEach(i=>{ rr(x+58+i*72,H*0.23,18,4,2); ctx.fill(); });
       }
 
-      // Hanging pots
-      for(let x=180-scroll%280;x<W+180;x+=280){
-        ctx.strokeStyle='#8A9480'; ctx.lineWidth=2;
-        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H*0.22+18); ctx.stroke();
-        ctx.fillStyle='#B0796A';
-        ctx.beginPath(); ctx.arc(x,H*0.22+22,16,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle='rgba(255,255,255,0.2)';
-        ctx.beginPath(); ctx.arc(x-5,H*0.22+16,4,0,Math.PI*2); ctx.fill();
+      // Hanging copper pots
+      for(let x=120-(scroll*0.5)%320;x<W+120;x+=320){
+        ctx.strokeStyle='#6A7460'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H*0.12+14); ctx.stroke();
+        // pot
+        ctx.fillStyle='#C07850';
+        ctx.beginPath(); ctx.arc(x,H*0.12+20,18,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#D48A60';
+        ctx.beginPath(); ctx.arc(x-5,H*0.12+14,5,0,Math.PI*2); ctx.fill();
+        // shine
+        ctx.fillStyle='rgba(255,255,255,0.25)';
+        ctx.beginPath(); ctx.arc(x-6,H*0.12+14,3,0,Math.PI*2); ctx.fill();
+      }
+
+      // Plants on counter
+      for(let x=200-(scroll*0.3)%W;x<W+80;x+=650){
+        drawPlant(x+200,FLOOR_Y-48,0.55);
+      }
+
+      // Rug runner
+      for(let x=100-(scroll*0.25)%(W+400);x<W+180;x+=580){
+        drawRug(x,FLOOR_Y-2,160,H-FLOOR_Y+2,'#8A6E4A','#D4A84A','#E8C87A');
       }
     }
 
-    /* Bedroom */
+    /* ══════════════════════════════
+       BEDROOM  (soft lavender + cosy)
+    ══════════════════════════════ */
     function drawBedroom(scroll){
-      const R=ROOMS[2];
-      drawFloorAndWall(R.sky,R.floor,R.wall);
+      drawRoomBase('#B0A4C8','#C4B8DC','#A098BC','#8878A8','#604878');
+      drawWoodFloor(scroll, 90, 'rgba(0,0,0,0.05)');
 
-      // Carpet planks
-      ctx.strokeStyle='rgba(0,0,0,0.04)'; ctx.lineWidth=1;
-      for(let x=-scroll%90;x<W+90;x+=90){
-        ctx.beginPath(); ctx.moveTo(x,FLOOR_Y); ctx.lineTo(x,H); ctx.stroke();
+      // Wallpaper subtle pattern
+      ctx.fillStyle='rgba(91,79,207,0.06)';
+      ctx.font='13px sans-serif'; ctx.textAlign='center';
+      for(let x=60-(scroll*0.4)%120;x<W+60;x+=120)
+        for(let y=40;y<FLOOR_Y-20;y+=70) ctx.fillText('✦',x,y);
+      ctx.textAlign='left';
+
+      // Framed artwork
+      for(let x=160-(scroll*0.3)%(W+400);x<W+200;x+=500){
+        drawPictureFrame(x,H*0.08,56,70,'#E8D8F0');
+      }
+
+      // Bed headboard + frame (grand, like hotel room)
+      for(let x=40-(scroll*0.22)%(W+450);x<W+280;x+=720){
+        // headboard
+        ctx.fillStyle='#4A3060'; rr(x,FLOOR_Y-110,220,112,8); ctx.fill();
+        ctx.fillStyle='#5A4070'; rr(x+10,FLOOR_Y-104,200,90,6); ctx.fill();
+        // fabric texture lines
+        ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=2;
+        for(let bx=x+20;bx<x+210;bx+=18){
+          ctx.beginPath(); ctx.moveTo(bx,FLOOR_Y-100); ctx.lineTo(bx,FLOOR_Y-16); ctx.stroke();
+        }
+        // Mattress
+        ctx.fillStyle='#E8E0F0'; rr(x,FLOOR_Y-30,220,34,4); ctx.fill();
+        ctx.fillStyle='#D0C8E8'; ctx.fillRect(x+10,FLOOR_Y-30,200,4);
+        // Pillows
+        [[x+14,FLOOR_Y-54,56,24],[x+82,FLOOR_Y-54,56,24],[x+150,FLOOR_Y-54,56,24]].forEach(([px,py,pw,ph])=>{
+          ctx.fillStyle='#F0EAF8'; rr(px,py,pw,ph,7); ctx.fill();
+          ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.fillRect(px+8,py+5,pw-16,4);
+        });
+        // Duvet
+        ctx.fillStyle='#C8B8E4'; rr(x,FLOOR_Y-28,220,30,4); ctx.fill();
+        ctx.fillStyle='#B8A8D4'; ctx.fillRect(x+10,FLOOR_Y-24,200,4);
+        // Bed legs
+        ctx.fillStyle='#3A2048';
+        [[x+8,FLOOR_Y+2],[x+204,FLOOR_Y+2]].forEach(([lx,ly])=>{ ctx.fillRect(lx,ly,12,16); });
+      }
+
+      // Bedside lamp
+      for(let x=272-(scroll*0.22)%(W+450);x<W+100;x+=720){
+        ctx.fillStyle='#C4A060';
+        ctx.beginPath(); ctx.arc(x+14,FLOOR_Y-64,3,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#8A6030'; ctx.fillRect(x+12,FLOOR_Y-64,4,34);
+        // lamp shade
+        ctx.fillStyle='#F0D890';
+        ctx.beginPath();
+        ctx.moveTo(x-4,FLOOR_Y-68); ctx.lineTo(x+32,FLOOR_Y-68);
+        ctx.lineTo(x+24,FLOOR_Y-90); ctx.lineTo(x+4,FLOOR_Y-90);
+        ctx.closePath(); ctx.fill();
+        // lamp glow
+        const glow=ctx.createRadialGradient(x+14,FLOOR_Y-78,2,x+14,FLOOR_Y-70,36);
+        glow.addColorStop(0,'rgba(255,220,100,0.25)'); glow.addColorStop(1,'rgba(255,220,100,0)');
+        ctx.fillStyle=glow; ctx.fillRect(x-22,FLOOR_Y-110,72,60);
       }
 
       // Rug
-      const rugX = 40 - scroll*0.12 % (W+400);
-      ctx.fillStyle='rgba(91,79,207,0.12)'; rr(rugX,FLOOR_Y-2,220,10,5); ctx.fill();
-
-      // Scrolling wallpaper stars
-      ctx.fillStyle='rgba(91,79,207,0.12)';
-      ctx.font='14px sans-serif'; ctx.textAlign='center';
-      for(let x=80-scroll*0.6%120;x<W+80;x+=120)
-        ctx.fillText('✦', x, H*0.35);
-      ctx.textAlign='left';
-
-      // Bed (far BG)
-      const bedX = 60 - scroll*0.25 % (W+400);
-      ctx.fillStyle=R.accent; rr(bedX, FLOOR_Y-72, 178, 70, 6); ctx.fill();
-      ctx.fillStyle=R.accent2; rr(bedX+6,FLOOR_Y-62,166,52,4); ctx.fill();
-      ctx.fillStyle='rgba(255,255,255,0.4)'; rr(bedX+16,FLOOR_Y-67,50,20,6); ctx.fill();
-      rr(bedX+74,FLOOR_Y-67,50,20,6); ctx.fill();
+      for(let x=30-(scroll*0.18)%(W+400);x<W+230;x+=660){
+        drawRug(x,FLOOR_Y-2,230,H-FLOOR_Y+2,'#7060A0','#D4A84A','#E8C870');
+      }
     }
 
-    /* Garden Hallway */
+    /* ══════════════════════════════
+       GARDEN HALLWAY  (bright greenery)
+    ══════════════════════════════ */
     function drawGarden(scroll){
-      const R=ROOMS[3];
-      drawFloorAndWall(R.sky,R.floor,R.wall);
+      drawRoomBase('#6A9060','#80A870','#587848','#78A040','#4A7020');
 
-      // Grass floor
-      ctx.fillStyle='#A8CC78'; ctx.fillRect(0,FLOOR_Y-10,W,14);
-      for(let x=-scroll%44;x<W+44;x+=44){
-        ctx.fillStyle='#88AA58';
-        ctx.beginPath(); ctx.moveTo(x,FLOOR_Y-10); ctx.lineTo(x+8,FLOOR_Y-28); ctx.lineTo(x+16,FLOOR_Y-10); ctx.fill();
+      // Grass strip on floor
+      ctx.fillStyle='#90C058'; ctx.fillRect(0, FLOOR_Y-14, W, 18);
+      for(let x=-(scroll%44);x<W+44;x+=44){
+        ctx.fillStyle='#70A038';
+        ctx.beginPath(); ctx.moveTo(x,FLOOR_Y-14); ctx.lineTo(x+8,FLOOR_Y-36); ctx.lineTo(x+16,FLOOR_Y-14); ctx.fill();
+        ctx.fillStyle='#80B848';
+        ctx.beginPath(); ctx.moveTo(x+6,FLOOR_Y-14); ctx.lineTo(x+12,FLOOR_Y-30); ctx.lineTo(x+18,FLOOR_Y-14); ctx.fill();
       }
 
-      // Scrolling trees/bushes
-      for(let x=180-scroll%260;x<W+180;x+=260){
-        ctx.fillStyle=R.accent;
-        ctx.beginPath(); ctx.arc(x, H*0.30, 38, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle=R.accent2;
-        ctx.beginPath(); ctx.arc(x, H*0.25, 28, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle='rgba(255,255,255,0.15)';
-        ctx.beginPath(); ctx.arc(x-9, H*0.23, 10, 0, Math.PI*2); ctx.fill();
-        // trunk
-        ctx.fillStyle='#7A5A38'; ctx.fillRect(x-7, H*0.38, 14, 38);
+      // Arched window openings (like garden hallway)
+      for(let x=120-(scroll*0.18)%(W+350);x<W+200;x+=380){
+        // window arch
+        const ww2=150, wh2=FLOOR_Y*0.72;
+        const sky3=ctx.createLinearGradient(x,H*0.06,x,H*0.06+wh2);
+        sky3.addColorStop(0,'#80B0D8'); sky3.addColorStop(0.5,'#A0C890'); sky3.addColorStop(1,'#78A840');
+        ctx.fillStyle=sky3;
+        ctx.beginPath();
+        ctx.arc(x+ww2/2, H*0.06+wh2*0.35, ww2/2, Math.PI, 0);
+        ctx.rect(x,H*0.06+wh2*0.35,ww2,wh2*0.65);
+        ctx.fill();
+        // outside tree in arch
+        ctx.fillStyle='#4A8040';
+        ctx.beginPath(); ctx.arc(x+ww2/2+20, H*0.06+50, 34, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle='#3A6830';
+        ctx.beginPath(); ctx.arc(x+ww2/2+20, H*0.06+38, 24, 0, Math.PI*2); ctx.fill();
+        // arch frame
+        ctx.strokeStyle='#C4A870'; ctx.lineWidth=5;
+        ctx.beginPath();
+        ctx.arc(x+ww2/2,H*0.06+wh2*0.35,ww2/2,Math.PI,0);
+        ctx.stroke();
+        ctx.strokeRect(x,H*0.06+wh2*0.35,ww2,wh2*0.65);
+        // grid lines
+        ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(x+ww2/2,H*0.06+wh2*0.35); ctx.lineTo(x+ww2/2,H*0.06+wh2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x,H*0.06+wh2*0.6); ctx.lineTo(x+ww2,H*0.06+wh2*0.6); ctx.stroke();
       }
 
-      // Flowers
-      const fCols=['#FF6B55','#FFD60A','#5B4FCF'];
-      for(let x=80-scroll%110;x<W+80;x+=110){
-        const col=fCols[Math.floor(x/110)%3];
+      // Large lush plants along hallway
+      for(let x=60-(scroll*0.4)%260;x<W+100;x+=260){
+        drawPlant(x+40, FLOOR_Y-10, 1.2);
+      }
+
+      // Flowers on ground
+      const fCols=['#FF6B55','#FFD60A','#5B4FCF','#FF9060'];
+      for(let x=70-(scroll%130);x<W+70;x+=130){
+        const col=fCols[Math.floor((x+scroll)/130)%4];
+        ctx.fillStyle='#5A8030'; ctx.fillRect(x+4,FLOOR_Y-22,3,14);
         ctx.fillStyle=col;
-        ctx.beginPath(); ctx.arc(x, FLOOR_Y-18, 8, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x+6,FLOOR_Y-22,8,0,Math.PI*2); ctx.fill();
         ctx.fillStyle='rgba(255,255,255,0.5)';
-        ctx.beginPath(); ctx.arc(x, FLOOR_Y-18, 4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x+6,FLOOR_Y-22,4,0,Math.PI*2); ctx.fill();
+      }
+
+      // Pebble path
+      for(let x=20-(scroll*0.6)%120;x<W+30;x+=120){
+        ctx.fillStyle='rgba(200,180,140,0.35)';
+        ctx.beginPath(); ctx.ellipse(x+20,FLOOR_Y+12,18,8,0,0,Math.PI*2); ctx.fill();
       }
     }
 
