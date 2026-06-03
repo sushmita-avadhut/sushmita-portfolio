@@ -201,7 +201,7 @@
     .btn-s:hover { border-color: var(--ink); transform: translateY(-2px); }
 
     /* ── ABOUT CARD ── */
-    #about { width: 400px; background: var(--mint-light); transform: rotate(-1.5deg); }
+    #about { width: 400px; background: #E7FBFF; transform: rotate(-1.5deg); }
     .about-h { font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: -1px; margin-bottom: 14px; }
     .about-p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.72; margin-bottom: 6px; }
     .about-p em { font-style: italic; font-weight: 700; color: var(--ink); }
@@ -226,7 +226,8 @@
     .proj:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.14); }
     .proj-ico { font-size: 18px; line-height: 1; padding-top: 1px; }
     .proj-name { font-size: 13.5px; font-weight: 700; color: white; margin-bottom: 3px; }
-    .proj-co { font-family: var(--mono); font-size: 9.5px; color: rgba(255,255,255,0.38); margin-bottom: 6px; }
+    .proj-co { font-family: var(--mono); font-size: 9.5px; color: rgba(255,255,255,0.38); margin-bottom: 4px; }
+    .proj-desc { font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 7px; line-height: 1.4; }
     .proj-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .pt {
       font-family: var(--mono); font-size: 9px; letter-spacing: 0.05em;
@@ -240,7 +241,7 @@
     .proj:hover .proj-arr { color: var(--yellow); transform: translate(2px,-2px); }
 
     /* ── EXPERIENCE CARD ── */
-    #experience { width: 445px; background: #FEFFD3; transform: rotate(1deg); }
+    #experience { width: 445px; background: #FEFEE6; transform: rotate(1deg); }
     #experience .card-label span { background: #C8C800; }
     .exp-h { font-size: 24px; font-weight: 800; color: var(--ink); letter-spacing: -0.8px; margin-bottom: 20px; }
     .timeline { position: relative; padding-left: 22px; }
@@ -654,6 +655,7 @@
             <div>
               <div class="proj-name">Split-Payment Experience</div>
               <div class="proj-co">Dell Technologies · B2B/B2C</div>
+              <div class="proj-desc">Cut checkout friction for Dell B2C and B2B customers split-paying cart totals</div>
               <div class="proj-tags"><span class="pt">UX Research</span><span class="pt">Prototyping</span><span class="pt">Usability Testing</span></div>
             </div>
             <a class="proj-arr" href="https://sushavadhut.wixsite.com/sushmitaavadhut/split-payment-project-a" target="_blank" onclick="event.stopPropagation()">↗</a>
@@ -663,6 +665,7 @@
             <div>
               <div class="proj-name">Transport Management System</div>
               <div class="proj-co">Fynd / Retail - E-commerce</div>
+              <div class="proj-desc">Designed the TMS powering 100+ shipments/day for Fynd retailers</div>
               <div class="proj-tags"><span class="pt">Product Design</span><span class="pt">Enterprise UX</span></div>
             </div>
             <a class="proj-arr" href="https://www.fynd.com/solutions/transport-management-system" target="_blank" onclick="event.stopPropagation()">↗</a>
@@ -672,18 +675,19 @@
             <div>
               <div class="proj-name">Opal Mobile Design System</div>
               <div class="proj-co">Fynd / Retail - E-commerce</div>
+              <div class="proj-desc">Built Opal — the mobile design system adopted across 5 Fynd products</div>
               <div class="proj-tags"><span class="pt">Design System</span><span class="pt">Mobile UX</span></div>
             </div>
             <a class="proj-arr" href="https://sushavadhut.wixsite.com/sushmitaavadhut" target="_blank" onclick="event.stopPropagation()">↗</a>
           </div>
-          <div class="proj" onclick="window.open('https://drive.google.com/file/d/1THKMaJ0YaLB_GIHyb-6Z2wJUIw-jzqRB/view?usp=sharing','_blank')">
+          <div class="proj" onclick="window.open('cardcapture-casestudy.html','_blank')">
             <div class="proj-ico">🔄</div>
             <div>
               <div class="proj-name">CardCapture Workflow</div>
               <div class="proj-co">Dell Technologies · Checkout Team</div>
               <div class="proj-tags"><span class="pt">Workflow Design</span><span class="pt">B2B</span></div>
             </div>
-            <a class="proj-arr" href="https://drive.google.com/file/d/1THKMaJ0YaLB_GIHyb-6Z2wJUIw-jzqRB/view?usp=sharing" target="_blank" onclick="event.stopPropagation()">↗</a>
+            <a class="proj-arr" href="cardcapture-casestudy.html" target="_blank" onclick="event.stopPropagation()">↗</a>
           </div>
         </div>
         <div style="margin-top:16px;text-align:right;">
@@ -829,20 +833,6 @@
             </a>
           </div>
         </div>
-        <div class="blog-post">
-          <div class="blog-ico">💡</div>
-          <div>
-            <div class="blog-title">On designing for Enterprise — the unsung complexity</div>
-            <div class="blog-meta">Coming soon · LinkedIn</div>
-          </div>
-        </div>
-        <div class="blog-post">
-          <div class="blog-ico">🎨</div>
-          <div>
-            <div class="blog-title">Why Lean UX changed how I think about shipping</div>
-            <div class="blog-meta">Coming soon · LinkedIn</div>
-          </div>
-        </div>
         <a class="blogs-li" href="https://www.linkedin.com/in/sushmita-avadhut-3850021b2/" target="_blank">🔗 Follow on LinkedIn for updates →</a>
       </div>
 
@@ -862,12 +852,15 @@
 
       <!-- STICKERS -->
       <img class="sticker" style="position:absolute; left:470px; top:678px; width:150px; transform:rotate(-10deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_talk_data_t.svg" alt="">
+      <img class="sticker" style="position:absolute; left:472px; top:852px; width:150px; transform:rotate(-4deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_working_t.png" alt="Illustration of Sushmita sitting cross-legged working on a laptop">
       <img class="sticker" style="position:absolute; left:1940px; top:1490px; width:110px; transform:rotate(8deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_brain_t.svg" alt="">
       <img class="sticker" style="position:absolute; left:1370px; top:140px; width:120px; transform:rotate(12deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_avatar_t.svg" alt="">
       <img class="sticker" style="position:absolute; left:1395px; top:278px; width:90px; transform:rotate(-8deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_nazar_t.svg" alt="">
       <img class="sticker" style="position:absolute; left:920px; top:1750px; width:110px; transform:rotate(-10deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_globe_t.svg" alt="">
       <img class="sticker" style="position:absolute; left:1890px; top:2000px; width:120px; transform:rotate(12deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_breakingprod_t.svg" alt="">
       <img class="sticker" style="position:absolute; left:2700px; top:1250px; width:140px; transform:rotate(-8deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_gta_t.svg" alt="">
+      <img class="sticker" style="position:absolute; left:2588px; top:235px; width:165px; transform:rotate(7deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_celebrate_t.png" alt="Illustration of Sushmita celebrating with arms and leg raised">
+      <img class="sticker" style="position:absolute; left:812px; top:300px; width:170px; transform:rotate(-6deg); pointer-events:none; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13)); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);" src="assets/sticker_idea_t.png" alt="Illustration of Sushmita holding a lightbulb and a puzzle piece">
 
       <!-- SECTION MARKERS (hand-written label feel) -->
       <div class="section-marker" style="left:653px;top:718px;">Work</div>
@@ -1010,8 +1003,16 @@
     // ── CENTRE ON CARD ──
     function centreOnCard(id, s) {
       const c  = CARDS[id];
-      const tx = vCX() - (c.x + c.w / 2) * s;
-      const ty = vCY() - (c.y + c.h / 2) * s;
+      // Use the card's actual rendered box when laid out, so cards whose
+      // content is taller/shorter than their declared CARDS height still
+      // center correctly. Fall back to static dims pre-layout.
+      const el = document.getElementById(id);
+      const x = (el && el.offsetWidth)  ? el.offsetLeft   : c.x;
+      const y = (el && el.offsetHeight) ? el.offsetTop    : c.y;
+      const w = (el && el.offsetWidth)  ? el.offsetWidth  : c.w;
+      const h = (el && el.offsetHeight) ? el.offsetHeight : c.h;
+      const tx = vCX() - (x + w / 2) * s;
+      const ty = vCY() - (y + h / 2) * s;
       return { tx, ty };
     }
 
