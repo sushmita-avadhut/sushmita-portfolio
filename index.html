@@ -207,7 +207,10 @@
       border-radius: 12px; overflow: hidden; padding: 0; position: relative; color: #fff;
     }
     .about-cover { position: absolute; inset: 0; }
-    .about-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 26%; }
+    .about-slides { position: absolute; inset: 0; }
+    .about-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 26%; opacity: 0; transition: opacity 0.9s ease; }
+    .about-photo.is-active { opacity: 1; }
+    @media (prefers-reduced-motion: reduce) { .about-photo { transition: none; } }
     .about-cover-grad { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,7,18,0.95) 3%, rgba(8,7,18,0.55) 34%, rgba(8,7,18,0.08) 64%, rgba(8,7,18,0.25) 100%); }
     #about .card-label { position: absolute; top: 20px; left: 22px; margin: 0; color: rgba(255,255,255,0.8); z-index: 2; }
     #about .card-label span { background: var(--mint); }
@@ -835,7 +838,14 @@
       <!-- ─────────────────────────── ABOUT CARD ─────────────────────────── -->
       <div class="card" id="about" style="left:980px; top:110px; transform: rotate(-3deg);">
         <div class="about-cover">
-          <img class="about-photo" src="assets/avatar.png" alt="Photo of Sushmita Avadhut smiling">
+          <div class="about-slides" id="aboutSlides">
+            <img class="about-photo is-active" src="assets/about-4.png" alt="Sushmita at a mountain campsite">
+            <img class="about-photo" data-src="assets/about-1.png" alt="Inside the Colosseum, Rome">
+            <img class="about-photo" data-src="assets/about-5.png" alt="Sushmita by an alpine lake">
+            <img class="about-photo" data-src="assets/about-2.png" alt="Sushmita holding a robot seal at a museum">
+            <img class="about-photo" data-src="assets/about-3.png" alt="A stacked-stone cairn in the mountains">
+            <img class="about-photo" data-src="assets/about-6.png" alt="Sushmita holding a colorful building-facade jigsaw puzzle">
+          </div>
           <div class="about-cover-grad"></div>
           <div class="card-label"><span></span> About Me</div>
           <h2 class="about-h">Hey, I'm Sushmita 👋</h2>
@@ -1419,6 +1429,24 @@
         apply(node.classList.contains('open'), false);
         row.addEventListener('click', () => apply(!node.classList.contains('open'), true));
       });
+    })();
+
+    // ── ABOUT COVER · auto-rotating photo carousel (curtain hover untouched) ──
+    (function(){
+      const wrap = document.getElementById('aboutSlides');
+      if (!wrap) return;
+      const slides = Array.from(wrap.querySelectorAll('.about-photo'));
+      if (slides.length < 2) return;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+      let i = 0;
+      // Preload the lazy slides so crossfades don't flash.
+      slides.forEach(img => { if (!img.src && img.dataset.src) img.src = img.dataset.src; });
+      setInterval(() => {
+        slides[i].classList.remove('is-active');
+        i = (i + 1) % slides.length;
+        slides[i].classList.add('is-active');
+      }, 2500);
     })();
 
     // ── ANIMATE TO POSITION + SCALE ──
