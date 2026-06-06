@@ -7,7 +7,7 @@
   <meta name="description" content="Senior Product Designer shipping AI commerce at Fynd (Jio), leading supply chain. I design enterprise platforms used by retailers across categories, working end-to-end from research to shipped product.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -143,6 +143,15 @@
     }
     .card:hover { box-shadow: var(--shadow-lg); }
 
+    /* ── CONNECTIVE TISSUE (hand-drawn arrows + tiny labels between clusters) ── */
+    .canvas-arrow { position: absolute; z-index: 0; pointer-events: none; height: auto; user-select: none; }
+    .canvas-note {
+      position: absolute; z-index: 1; pointer-events: none; white-space: nowrap;
+      font-family: 'Caveat', cursive; font-size: 14px; font-weight: 600; line-height: 1;
+      color: #6E6E76; background: #FFF; border: 1px solid #C6C6CB; border-radius: 32px;
+      padding: 5px 14px;
+    }
+
     .card-label {
       display: inline-flex; align-items: center; gap: 6px;
       font-family: var(--mono); font-size: 10px; font-weight: 500;
@@ -167,10 +176,25 @@
       font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
       text-transform: uppercase; color: var(--ink-muted); margin-bottom: 10px;
     }
-    .hero-name {
-      font-size: 50px; font-weight: 800; color: var(--ink); letter-spacing: -2.5px;
-      line-height: 1; margin-bottom: 10px;
+    /* name inside a design-tool selection frame */
+    .hero-frame { position: relative; display: inline-block; padding: 14px 20px; margin: 14px 0 16px; }
+    .hero-frame::before {
+      content: ''; position: absolute; inset: 0;
+      border: 1.5px solid rgba(26,24,36,0.55);
     }
+    .hero-name {
+      position: relative; font-size: 46px; font-weight: 800; color: var(--ink);
+      letter-spacing: -2px; line-height: 1; margin: 0;
+    }
+    .hero-handle {
+      position: absolute; width: 14px; height: 14px; background: #fff;
+      border: 1.5px solid #1A1824; z-index: 2;
+    }
+    .hero-handle.tl { left: -7px; top: -7px; }
+    .hero-handle.tr { right: -7px; top: -7px; }
+    .hero-handle.bl { left: -7px; bottom: -7px; }
+    .hero-handle.br { right: -7px; bottom: -7px; }
+    .hero-cursor { position: absolute; right: -20px; top: -10px; width: 26px; height: 30px; z-index: 3; }
     .hero-role {
       font-size: 21px; font-weight: 700; color: var(--ink);
       letter-spacing: -0.5px; line-height: 1.25; margin-bottom: 18px;
@@ -178,12 +202,13 @@
     .hero-hl { background: var(--yellow); padding: 1px 5px; border-radius: 5px; }
     .hero-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
     .hero-divider { height: 1px; background: var(--border); margin-bottom: 22px; }
-    .hero-row { display: flex; align-items: center; gap: 20px; }
+    .hero-row { display: flex; align-items: flex-end; gap: 0; }
     .hero-avatar {
-      width: 76px; height: 76px; border-radius: 50%; flex-shrink: 0;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(91,79,207,0.3);
+      position: absolute; left: 0; bottom: 0;
+      width: 150px; height: 208px; border-radius: 14px 14px 0 20px;
+      overflow: hidden; box-shadow: none; z-index: 2;
     }
+    .hero-bio { padding-left: 144px; }
     .hero-bio { flex: 1; }
     .hero-bio p { font-size: 13px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 16px; }
     .hero-btns { display: flex; gap: 9px; }
@@ -241,10 +266,9 @@
     @media (prefers-reduced-motion: reduce) { .about-reveal { transition: none; } }
 
     /* ── WORK CARD ── */
-    #work { width: 490px; background: #FFFFFF; transform: rotate(-1deg); }
-    #work .card-label { color: var(--ink-muted); }
-    #work .card-label span { background: var(--yellow); }
-    .work-h { font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: -1px; margin-bottom: 18px; }
+    /* Work card is container-less — folder sits directly on the canvas */
+    #work { width: 400px; background: transparent; box-shadow: none; padding: 0; border-radius: 0; }
+    #work:hover { box-shadow: none; }
     .proj-list { display: flex; flex-direction: column; gap: 3px; }
     .proj {
       display: grid; grid-template-columns: 28px 1fr auto;
@@ -269,79 +293,110 @@
     }
     .proj:hover .proj-arr { color: var(--yellow); transform: translate(2px,-2px); }
 
-    /* ── INTERACTIVE PROJECT CAROUSEL (3D tilt) ── */
-    .proj-carousel { position: relative; width: 100%; }
-    .pc-stage {
-      position: relative; width: 320px; max-width: 100%; margin: 2px auto 0;
-      aspect-ratio: 9 / 12; perspective: 1200px;
+    /* ── ANIMATED 3D FOLDER (Live Projects) ── */
+    .folder-wrap {
+      position: relative; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 14px 8px 6px; cursor: pointer; user-select: none;
     }
-    .pcard {
-      position: absolute; inset: 0; border-radius: 26px; overflow: hidden;
-      transform-style: preserve-3d; cursor: pointer;
-      box-shadow: 0 22px 50px rgba(0,0,0,0.5);
-      opacity: 0; pointer-events: none; z-index: 1;
-      transform: perspective(1000px) scale(0.9);
-      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1);
+    .folder-stage {
+      position: relative; display: flex; align-items: center; justify-content: center;
+      height: 230px; width: 300px; perspective: 1000px; margin-bottom: 4px;
     }
-    .pcard.is-active {
-      opacity: 1; pointer-events: auto; z-index: 2;
-      transform: perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1);
+    /* folder back layer */
+    .folder-back {
+      position: absolute; width: 158px; height: 116px; border-radius: 14px; z-index: 10;
+      background: linear-gradient(150deg, #FFB48F 0%, #FF8A5C 100%);
+      box-shadow: 0 6px 16px rgba(255,107,85,0.28);
+      transform-origin: bottom center; transform: rotateX(0deg);
+      transition: transform 500ms cubic-bezier(0.34,1.56,0.64,1);
     }
-    .pcard-img {
-      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-      transform: translateZ(-20px) scale(1.12);
+    /* folder tab */
+    .folder-tab {
+      position: absolute; width: 58px; height: 16px; border-radius: 7px 7px 0 0; z-index: 10;
+      top: calc(50% - 58px - 14px); left: calc(50% - 79px + 18px);
+      background: linear-gradient(150deg, #FFB48F 0%, #FF9D70 100%);
+      transform-origin: bottom center; transform: rotateX(0deg);
+      transition: transform 500ms cubic-bezier(0.34,1.56,0.64,1);
     }
-    .pcard-fill { position: absolute; inset: 0; transform: translateZ(-20px) scale(1.12); }
-    .pcard-fill .pcard-emoji-bg {
-      position: absolute; bottom: -10px; right: -6px; font-size: 150px; line-height: 1;
-      opacity: 0.16; filter: grayscale(0.2);
+    /* project cards layer */
+    .folder-cards {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 20;
     }
-    .pcard-grad {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.22) 46%, rgba(0,0,0,0.04));
+    .fcard {
+      position: absolute; left: -70px; top: -98px; width: 141px; height: 195px;
+      border-radius: 18px; overflow: hidden; cursor: pointer;
+      background: var(--ink); border: 2px solid #fff;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.32);
+      transform: translateY(6px) translateX(0) rotate(0deg) scale(0.55);
+      opacity: 0; pointer-events: none;
+      transition: transform 600ms cubic-bezier(0.34,1.56,0.64,1), opacity 400ms ease;
     }
-    .pcard-content { position: absolute; inset: 0; padding: 18px; display: flex; flex-direction: column; transform: translateZ(45px); }
-    .pcard-head {
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
-      border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.10);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-radius: 16px; padding: 13px 15px;
+    .fcard img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .fcard-grad { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.72), transparent 58%); }
+    .fcard-name {
+      position: absolute; bottom: 11px; left: 12px; right: 12px; z-index: 2;
+      font-size: 14px; font-weight: 700; color: #fff; line-height: 1.15;
+      letter-spacing: -0.2px; text-shadow: 0 1px 6px rgba(0,0,0,0.5);
     }
-    .pcard-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.3px; line-height: 1.15; }
-    .pcard-sub { font-size: 10px; color: rgba(255,255,255,0.74); font-family: var(--mono); margin-top: 4px; letter-spacing: 0.02em; }
-    .pcard-emoji { font-size: 20px; line-height: 1; flex-shrink: 0; }
-    .pcard-pill {
-      position: absolute; top: 104px; left: 18px;
-      background: rgba(93,79,215,0.88); color: #fff; font-size: 10.5px; font-weight: 700;
-      font-family: var(--mono); letter-spacing: 0.03em;
-      padding: 6px 13px; border-radius: 100px; backdrop-filter: blur(6px);
-      box-shadow: 0 4px 14px rgba(93,79,215,0.45);
+    .fcard:hover { box-shadow: 0 26px 52px rgba(0,0,0,0.48); }
+    /* per-card fan-out targets (used only when the folder is open) */
+    .fcard[data-i="0"] { --ty: -120px; --tx: -122px; --rot: -16deg; }
+    .fcard[data-i="1"] { --ty: -144px; --tx: -42px;  --rot: -6deg;  }
+    .fcard[data-i="2"] { --ty: -144px; --tx: 42px;   --rot: 6deg;   }
+    .fcard[data-i="3"] { --ty: -120px; --tx: 122px;  --rot: 16deg;  }
+    .folder-wrap:hover .fcard {
+      opacity: 1; pointer-events: auto;
+      transform: translateY(var(--ty)) translateX(var(--tx)) rotate(var(--rot)) scale(1);
     }
-    .pcard-cta {
-      margin-top: auto; align-self: flex-start;
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(255,255,255,0.95); color: #1E1A3C;
-      font-size: 12px; font-weight: 700; padding: 9px 16px; border-radius: 100px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.28); transition: transform 0.2s, box-shadow 0.2s;
+    /* hovered card lifts and rises above its neighbours */
+    .folder-wrap:hover .fcard:hover {
+      z-index: 50;
+      transform: translateY(calc(var(--ty) - 16px)) translateX(var(--tx)) rotate(calc(var(--rot) * 0.55)) scale(1.08);
     }
-    .pcard:hover .pcard-cta { transform: translateY(-1px); box-shadow: 0 9px 22px rgba(0,0,0,0.34); }
-    /* carousel controls */
-    .pc-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; }
-    .pc-arrow {
-      width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
-      background: rgba(30,26,60,0.06); color: var(--ink); font-size: 14px; line-height: 1;
-      display: inline-flex; align-items: center; justify-content: center;
-      transition: background 0.2s, color 0.2s, transform 0.2s;
+    /* folder front + shine */
+    .folder-front, .folder-shine {
+      position: absolute; width: 158px; height: 116px; border-radius: 14px;
+      top: calc(50% - 58px + 4px);
+      transform-origin: bottom center; transform: rotateX(0deg);
+      transition: transform 500ms cubic-bezier(0.34,1.56,0.64,1);
     }
-    .pc-arrow:hover { background: var(--purple); color: #fff; transform: scale(1.08); }
-    .pc-dots { display: flex; align-items: center; gap: 7px; }
-    .pc-dot {
-      width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; cursor: pointer;
-      background: rgba(30,26,60,0.22); transition: all 0.25s;
+    .folder-front {
+      z-index: 30; background: linear-gradient(150deg, #FF9D70 0%, #FF6B55 100%);
+      box-shadow: 0 12px 26px rgba(255,107,85,0.4);
     }
-    .pc-dot.active { background: var(--purple); width: 20px; border-radius: 4px; }
+    .folder-shine {
+      z-index: 31; pointer-events: none; overflow: hidden;
+      background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 52%);
+    }
+    /* open state (hover) */
+    .folder-wrap:hover .folder-back  { transform: rotateX(-16deg); }
+    .folder-wrap:hover .folder-tab   { transform: rotateX(-26deg) translateY(-2px); }
+    .folder-wrap:hover .folder-front { transform: rotateX(26deg) translateY(8px); }
+    .folder-wrap:hover .folder-shine { transform: rotateX(26deg) translateY(8px); }
+    /* folder labels */
+    .folder-title {
+      font-size: 21px; font-weight: 800; color: var(--ink); letter-spacing: -0.6px;
+      margin-top: 14px; transition: transform 0.3s; transform: translateY(0);
+    }
+    .folder-wrap:hover .folder-title { transform: translateY(4px); }
+    .folder-count { font-size: 13px; color: var(--ink-muted); margin-top: 3px; transition: opacity 0.3s; }
+    .folder-wrap:hover .folder-count { opacity: 0.7; }
+    .folder-hint {
+      font-size: 11px; font-family: var(--mono); color: var(--ink-muted);
+      margin-top: 9px; opacity: 0.7; transition: opacity 0.3s, transform 0.3s;
+    }
+    .folder-wrap:hover .folder-hint { opacity: 0; transform: translateY(8px); }
+    /* More Work pill — secondary CTA (matches "Get in Touch") */
+    .more-work {
+      display: inline-flex; align-items: center; gap: 7px; margin: 14px auto 0;
+      font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none;
+      padding: 12px 26px; border: 1.5px solid var(--border); border-radius: 100px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .more-work:hover { border-color: var(--ink); transform: translateY(-1px); }
+
     @media (prefers-reduced-motion: reduce) {
-      .pcard, .pcard.is-active { transition: opacity 0.3s ease; }
+      .fcard, .folder-back, .folder-tab, .folder-front, .folder-shine { transition: none !important; }
     }
 
     /* ── EXPERIENCE · FILE-TREE ── */
@@ -350,9 +405,9 @@
     #experience .card-label span { background: #C8C800; }
 
     .ftree {
-      background: #FDFDF4; border: 1px solid rgba(0,0,0,0.07); border-radius: 14px;
+      background: #FFFFFF; border: 1px solid #E7E5E3; border-radius: 14px;
       padding: 8px; font-family: var(--mono);
-      box-shadow: 0 14px 38px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.7);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.7);
     }
     .ftree-bar {
       display: flex; align-items: center; gap: 8px;
@@ -409,30 +464,65 @@
     }
 
     /* ── RESUME CARD ── */
-    #resume { width: 360px; transform: rotate(1.5deg); }
-    .resume-preview {
-      width: 100%; height: 190px; border-radius: 13px; overflow: hidden;
-      background: #F5F4F0; border: 1px solid var(--border); position: relative; margin-bottom: 20px;
+    /* ── RESUME CARD (animated-card style) ── */
+    #resume { width: 430px; padding: 0; overflow: hidden; transform: rotate(1.5deg); box-shadow: none; background: transparent; border: 1px solid #E7E5E3; }
+    #resume:hover { box-shadow: none; }
+    .rz-visual { position: relative; height: 118px; width: 100%; overflow: hidden; }
+    .rz-chart { position: absolute; inset: 0; opacity: 0.6; }
+    .rz-glow {
+      position: absolute; inset: 0; z-index: 1;
+      background: radial-gradient(ellipse 55% 80% at 50% 28%, rgba(255,107,85,0.22), transparent 70%);
     }
-    .resume-preview::before {
-      content: ''; position: absolute; inset: 0;
-      background: repeating-linear-gradient(to bottom,transparent,transparent 13px,rgba(0,0,0,0.05) 13px,rgba(0,0,0,0.05) 14px);
+    .rz-grid {
+      position: absolute; inset: 0; z-index: 2; opacity: 0.7;
+      background-image: linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px);
+      background-size: 20px 20px; background-position: center;
+      -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 40%, #000 60%, transparent 100%);
+              mask-image: radial-gradient(ellipse 60% 60% at 50% 40%, #000 60%, transparent 100%);
     }
-    .resume-logo { position: absolute; top: 14px; left: 16px; font-size: 20px; font-weight: 800; color: var(--ink); letter-spacing: -1px; }
-    .resume-blur {
-      position: absolute; inset: 0; backdrop-filter: blur(4px);
-      background: rgba(245,244,240,0.7); display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 7px;
+    /* line graph + white reveal curtain (Layer2) */
+    .rz-line { position: absolute; top: 0; left: -1px; width: 100%; height: 100%; z-index: 3; }
+    .rz-line svg { display: block; width: 100%; height: 100%; }
+    .rz-reveal {
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(to right, transparent 0%, #fff 15%);
+      transition: transform 0.5s cubic-bezier(0.6,0.6,0,1);
     }
-    .resume-lock { font-size: 30px; }
-    .resume-lock-txt { font-size: 11.5px; font-weight: 600; color: var(--ink-muted); font-family: var(--mono); }
-    .resume-name { font-size: 22px; font-weight: 800; color: var(--ink); letter-spacing: -0.5px; margin-bottom: 4px; }
-    .resume-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 12px; }
-    .resume-badge {
-      display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono);
-      font-size: 10px; color: var(--ink-muted); background: var(--purple-light);
-      padding: 3px 9px; border-radius: 100px; margin-bottom: 20px;
+    #resume:hover .rz-reveal { transform: translateX(100%); }
+    /* scrolling bars (Layer1) — twice as wide, slides to reveal taller right half */
+    .rz-bars { position: absolute; top: 0; left: 0; width: 200%; height: 100%; z-index: 4;
+      transition: transform 0.5s cubic-bezier(0.6,0.6,0,1); }
+    .rz-bars svg { display: block; width: 100%; height: 100%; }
+    #resume:hover .rz-bars { transform: translateX(-50%); }
+    @media (prefers-reduced-motion: reduce) {
+      .rz-bars, .rz-reveal { transition: none; }
     }
+    .rz-pills { position: absolute; top: 12px; right: 12px; z-index: 6; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .rz-pill {
+      display: inline-flex; align-items: center; font-family: 'Inter', var(--font);
+      font-size: 13px; color: #5b5966; background: rgba(255,255,255,0.55);
+      border: 1px solid var(--border); border-radius: 100px;
+      padding: 5px 14px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    }
+    .rz-body { padding: 18px 24px 24px; }
+    .rz-role {
+      font-family: 'Inter', var(--font); font-size: 26px; font-weight: 700;
+      color: #1A1825; letter-spacing: -0.8px; line-height: 1.05; margin-bottom: 16px;
+    }
+    .rz-entry-title { font-family: 'Inter', var(--font); font-size: 19px; font-weight: 600; color: #1A1825; line-height: 1.2; }
+    .rz-entry-meta { font-family: 'Inter', var(--font); font-size: 14px; font-weight: 500; color: #757575; margin: 6px 0; line-height: 1.4; }
+    .rz-entry-grade { font-family: 'Inter', var(--font); font-size: 15px; font-weight: 600; color: #1A1825; }
+    .rz-divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .rz-btn {
+      display: flex; margin: 22px auto 0; width: 100%;
+      align-items: center; justify-content: center; gap: 6px; text-decoration: none;
+      font-family: 'Inter', var(--font);
+      background: transparent; color: #1A1825; font-weight: 600; font-size: 17px;
+      padding: 15px 26px; border: 1.5px solid var(--border); border-radius: 100px;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .rz-btn:hover { border-color: var(--ink); transform: translateY(-1px); }
     .awards-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
     .award {
       display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
@@ -441,7 +531,8 @@
     }
 
     /* ── TOOLS CARD ── */
-    #tools { width: 680px; background: var(--purple-light); transform: rotate(-0.5deg); }
+    #tools { width: 680px; background: transparent; box-shadow: none; border: 1px solid #E7E5E3; transform: rotate(-0.5deg); }
+    #tools:hover { box-shadow: none; }
     #tools .card-label span { background: var(--purple); }
     .tools-h { font-size: 24px; font-weight: 800; color: var(--ink); letter-spacing: -0.8px; margin-bottom: 18px; }
     .tools-section { margin-bottom: 16px; }
@@ -496,26 +587,30 @@
     @media (prefers-reduced-motion: reduce) { .tool-tile, .tool-tile::after, .tool-tile::before { transition: none; } }
 
     /* ── BLOGS CARD ── */
-    #blogs { width: 400px; background: var(--pink-light); transform: rotate(1deg); }
+    /* Reflections — container-less; posts are shadcn "Alert" style boxes */
+    #blogs { width: 400px; background: transparent; box-shadow: none; padding: 0; transform: rotate(1deg); }
+    #blogs:hover { box-shadow: none; }
     .blogs-h { font-size: 24px; font-weight: 800; color: var(--ink); letter-spacing: -0.8px; margin-bottom: 4px; }
     .blogs-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 18px; }
     .blog-post {
-      display: flex; align-items: flex-start; gap: 11px; padding: 12px;
-      background: white; border-radius: 12px; margin-bottom: 8px;
-      border: 1px solid rgba(255,107,85,0.1); transition: all 0.18s;
+      position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 16px;
+      background: #fff; border: 1px solid #E7E5E3; border-radius: 10px; margin-bottom: 10px;
+      transition: border-color 0.18s, transform 0.18s;
     }
-    .blog-post:hover { transform: translateX(4px); border-color: rgba(255,107,85,0.28); }
-    .blog-ico { font-size: 22px; flex-shrink: 0; }
-    .blog-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 3px; line-height: 1.35; }
+    .blog-post:hover { transform: translateX(3px); border-color: #D4D2CF; }
+    .blog-ico { font-size: 20px; flex-shrink: 0; line-height: 1; }
+    .blog-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; line-height: 1.3; letter-spacing: -0.2px; }
     .blog-meta { font-family: var(--mono); font-size: 10px; color: var(--ink-muted); }
-    .blog-excerpt { font-size: 11px; color: var(--ink-soft); margin-top: 5px; line-height: 1.5; }
+    .blog-excerpt { font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; line-height: 1.55; }
     .blogs-li {
-      display: block; text-align: center; margin-top: 14px; font-size: 13px; font-weight: 700;
-      color: #0077B5; text-decoration: none; padding: 10px;
-      border: 1.5px solid rgba(0,119,181,0.2); border-radius: 12px;
-      background: rgba(0,119,181,0.04); transition: all 0.18s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; margin-top: 14px; font-family: var(--font);
+      font-size: 16px; font-weight: 600; color: var(--ink); text-decoration: none;
+      background: transparent; border: 1.5px solid var(--border); border-radius: 100px;
+      padding: 14px 26px; transition: border-color 0.2s, transform 0.2s;
     }
-    .blogs-li:hover { background: rgba(0,119,181,0.08); border-color: #0077B5; }
+    .blogs-li:hover { border-color: var(--ink); transform: translateY(-1px); }
+    .blogs-li svg { width: 22px; height: 22px; flex-shrink: 0; }
 
     /* ── STICKERS ── */
     .sticker {
@@ -766,6 +861,49 @@
 
     /* make proj rows clickable */
     .proj { cursor: pointer; }
+
+    /* ── SKILLS JAR (Fill me / Open me) ── */
+    #jar { display: flex; align-items: center; gap: 20px; background: transparent; box-shadow: none; padding: 0; }
+    #jar:hover { box-shadow: none; }
+    .jar-stage { position: relative; width: 168px; height: 224px; flex-shrink: 0; }
+    .jar-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; pointer-events: none; }
+    .jar-closed { display: none; }
+    #jar.closed .jar-open   { display: none; }
+    #jar.closed .jar-closed { display: block; }
+    /* pile sits over the jar body; overflow clips anything outside the glass */
+    .jar-pile { position: absolute; left: 26px; top: 78px; width: 116px; height: 104px; z-index: 2; overflow: hidden; }
+    .jar-tile {
+      position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px;
+      border-radius: 11px; background: #fff; border: 1px solid rgba(20,16,40,0.06);
+      box-shadow: 0 4px 12px rgba(40,30,90,0.18); display: flex; align-items: center; justify-content: center;
+      transform: translate(0, -210px) rotate(0deg) scale(0.55); opacity: 0;
+      transition: transform 0.7s cubic-bezier(0.34,1.4,0.55,1), opacity 0.35s ease;
+    }
+    .jar-tile > svg, .jar-tile > img { width: 25px; height: 25px; object-fit: contain; display: block; }
+    #jar.filled .jar-tile {
+      opacity: 1;
+      transform: translate(var(--tx,0), var(--ty,0)) rotate(var(--rot,0)) scale(1);
+    }
+    .jar-btn {
+      display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+      font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--ink);
+      background: #fff; border: 1.5px solid var(--border); border-radius: 100px;
+      padding: 12px 24px; transition: border-color 0.2s, transform 0.2s; white-space: nowrap;
+    }
+    .jar-btn:hover { border-color: var(--ink); transform: translateY(-1px); }
+    /* tiles that fly from the Skills card down into the jar (live in canvas-world, unclipped) */
+    .flight-tile {
+      position: absolute; width: 46px; height: 46px; border-radius: 11px; z-index: 6;
+      background: #fff; border: 1px solid rgba(20,16,40,0.06);
+      box-shadow: 0 6px 16px rgba(40,30,90,0.2);
+      display: flex; align-items: center; justify-content: center; will-change: transform;
+      transition: transform 0.9s cubic-bezier(0.45,0.05,0.6,1), opacity 0.3s ease;
+    }
+    .flight-tile > svg, .flight-tile > img { width: 26px; height: 26px; object-fit: contain; display: block; }
+    @media (prefers-reduced-motion: reduce) { .flight-tile { transition: opacity 0.3s ease; } }
+    #tools.emptied .tool-tile { opacity: 0; pointer-events: none; }
+    .tool-tile { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, opacity 0.45s ease; }
+    @media (prefers-reduced-motion: reduce) { .jar-tile { transition: opacity 0.3s ease; } }
   </style>
 </head>
 <body>
@@ -808,12 +946,25 @@
   <main id="canvas-viewport">
     <div id="canvas-world">
 
-
+      <!-- ── CONNECTORS: hand-drawn arrows + tiny labels between clusters (behind cards) ── -->
+      <img class="canvas-arrow" src="assets/arrow-squiggle.png" alt="" style="left:1000px; top:612px; width:120px;">
+      <img class="canvas-arrow" src="assets/arrow-curve.png" alt="" style="left:1200px; top:1212px; width:45px;">
+      <img class="canvas-arrow" src="assets/arrow-squiggle.png" alt="" style="left:1880px; top:600px; width:100px; transform:rotate(150deg);">
+      <div class="canvas-note" style="left:862px; top:650px; transform:rotate(-2deg);">Know more...</div>
+      <div class="canvas-note" style="left:1074px; top:1214px; transform:rotate(-3deg);">What I work with</div>
+      <div class="canvas-note" style="left:1792px; top:652px; transform:rotate(2deg);">the journey</div>
 
       <!-- ─────────────────────────── HERO CARD ─────────────────────────── -->
-      <div class="card" id="hero" style="left:1380px; top:820px;">
+      <div class="card" id="hero" style="left:1010px; top:710px;">
         <p class="hero-eyebrow">✦ Portfolio · Product Builder</p>
-        <h1 class="hero-name">Sushmita<br>Avadhut</h1>
+        <div class="hero-frame">
+          <span class="hero-handle tl"></span><span class="hero-handle tr"></span>
+          <span class="hero-handle bl"></span><span class="hero-handle br"></span>
+          <h1 class="hero-name">Sushmita<br>Avadhut</h1>
+          <svg class="hero-cursor" viewBox="0 0 24 28" fill="#1A1824" stroke="#fff" stroke-width="1.5" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M3 2 L3 22 L8.5 16.5 L12 25 L15 23.7 L11.4 15.5 L19 15.5 Z"/>
+          </svg>
+        </div>
         <h2 class="hero-role"><span class="hero-hl">Product Builder</span> &amp; UX Thinker</h2>
         <div class="hero-tags">
           <span class="tag">Enterprise</span>
@@ -824,7 +975,7 @@
         </div>
         <div class="hero-divider"></div>
         <div class="hero-row">
-          <div class="hero-avatar"><img src="assets/avatar.png" alt="Sushmita Avadhut" style="width:100%;height:100%;object-fit:cover;object-position:center top;border-radius:50%;"></div>
+          <div class="hero-avatar"><img src="assets/hero-illustration.png" alt="Illustration of Sushmita enjoying a bowl of food" style="width:100%;height:100%;object-fit:cover;object-position:center top;border-radius:18px;"></div>
           <div class="hero-bio">
             <p>Senior Product Designer shipping AI commerce at <strong>Fynd</strong> (Jio), leading supply chain. I design enterprise platforms used by retailers across categories, working end-to-end from research to shipped product.</p>
             <div class="hero-btns">
@@ -836,7 +987,7 @@
       </div>
 
       <!-- ─────────────────────────── ABOUT CARD ─────────────────────────── -->
-      <div class="card" id="about" style="left:980px; top:110px; transform: rotate(-3deg);">
+      <div class="card" id="about" style="left:660px; top:160px; transform: rotate(-3deg);">
         <div class="about-cover">
           <div class="about-slides" id="aboutSlides">
             <img class="about-photo is-active" src="assets/about-4.png" alt="Sushmita at a mountain campsite">
@@ -868,89 +1019,59 @@
       </div>
 
       <!-- ─────────────────────────── WORK CARD ─────────────────────────── -->
-      <div class="card" id="work" style="left:510px; top:760px;">
-        <div class="card-label"><span></span> Work &amp; Projects</div>
-        <h2 class="work-h">Selected Work ✦</h2>
-        <div class="proj-carousel" id="projCarousel">
-          <div class="pc-stage" id="pcStage">
-            <!-- 1 · CardCapture (image-backed) -->
-            <div class="pcard is-active" data-link="cardcapture-casestudy.html">
-              <img class="pcard-img" src="assets/cardcapture-hero.png" alt="Person scanning a business card with the CardCapture app on a phone">
-              <div class="pcard-grad"></div>
-              <div class="pcard-content">
-                <div class="pcard-head">
-                  <div>
-                    <div class="pcard-title" style="color:var(--ink);">CardCapture Workflow</div>
-                    <div class="pcard-sub" style="color:var(--ink-soft);">Self Initiative · Fynd</div>
-                  </div>
-                  <span class="pcard-emoji">🔄</span>
-                </div>
-                <div class="pcard-pill">Lead Automation</div>
-                <span class="pcard-cta">View case study ↗</span>
+      <div class="card" id="work" style="left:520px; top:740px;">
+        <div class="folder-wrap" id="liveFolder">
+          <div class="folder-stage">
+            <div class="folder-back"></div>
+            <div class="folder-tab"></div>
+            <div class="folder-cards">
+              <!-- 1 · CardCapture -->
+              <div class="fcard" data-i="0"
+                   data-link="cardcapture-casestudy.html"
+                   data-title="CardCapture Workflow" data-sub="Self Initiative · Fynd">
+                <img src="assets/cardcapture-hero.png" alt="Person scanning a business card with the CardCapture app on a phone">
+                <div class="fcard-grad"></div>
+                <div class="fcard-name">CardCapture</div>
+              </div>
+              <!-- 2 · Transport Management System -->
+              <div class="fcard" data-i="1"
+                   data-link="https://www.fynd.com/solutions/transport-management-system"
+                   data-title="Transport Management System" data-sub="Fynd · Retail E-commerce">
+                <img src="assets/tms-hero.png" alt="Logistics worker checking packages inside a green delivery truck on a tablet">
+                <div class="fcard-grad"></div>
+                <div class="fcard-name">Transport MS</div>
+              </div>
+              <!-- 3 · Split-Payment -->
+              <div class="fcard" data-i="2"
+                   data-link="https://sushavadhut.wixsite.com/sushmitaavadhut/split-payment-project-a"
+                   data-title="Split-Payment Experience" data-sub="Dell Technologies · B2B/B2C">
+                <img src="assets/splitpayment-hero.png" alt="Person at a laptop on a Dell split-payment checkout screen holding a blue card">
+                <div class="fcard-grad"></div>
+                <div class="fcard-name">Split-Payment</div>
+              </div>
+              <!-- 4 · Opal Design System -->
+              <div class="fcard" data-i="3"
+                   data-link="https://sushavadhut.wixsite.com/sushmitaavadhut"
+                   data-title="Opal Mobile Design System" data-sub="Fynd · Retail E-commerce">
+                <img src="assets/opal-hero.png" alt="Opal Mobile design system documentation — Selector Pill usage patterns and guidelines">
+                <div class="fcard-grad"></div>
+                <div class="fcard-name">Opal System</div>
               </div>
             </div>
-            <!-- 2 · Transport Management System -->
-            <div class="pcard" data-link="https://www.fynd.com/solutions/transport-management-system">
-              <img class="pcard-img" src="assets/tms-hero.png" alt="Logistics worker checking packages inside a green delivery truck on a tablet">
-              <div class="pcard-grad"></div>
-              <div class="pcard-content">
-                <div class="pcard-head">
-                  <div>
-                    <div class="pcard-title" style="color:var(--ink);">Transport Management System</div>
-                    <div class="pcard-sub" style="color:var(--ink-soft);">Fynd · Retail E-commerce</div>
-                  </div>
-                  <span class="pcard-emoji">🚛</span>
-                </div>
-                <div class="pcard-pill" style="background:rgba(14,155,140,0.9);box-shadow:0 4px 14px rgba(14,155,140,0.45);">Enterprise UX</div>
-                <span class="pcard-cta">View project ↗</span>
-              </div>
-            </div>
-            <!-- 3 · Split-Payment -->
-            <div class="pcard" data-link="https://sushavadhut.wixsite.com/sushmitaavadhut/split-payment-project-a">
-              <img class="pcard-img" src="assets/splitpayment-hero.png" alt="Person at a laptop on a Dell split-payment checkout screen holding a blue card">
-              <div class="pcard-grad"></div>
-              <div class="pcard-content">
-                <div class="pcard-head">
-                  <div>
-                    <div class="pcard-title" style="color:var(--ink);">Split-Payment Experience</div>
-                    <div class="pcard-sub" style="color:var(--ink-soft);">Dell Technologies · B2B/B2C</div>
-                  </div>
-                  <span class="pcard-emoji">💳</span>
-                </div>
-                <div class="pcard-pill">UX Research</div>
-                <span class="pcard-cta">View project ↗</span>
-              </div>
-            </div>
-            <!-- 4 · Opal Design System -->
-            <div class="pcard" data-link="https://sushavadhut.wixsite.com/sushmitaavadhut">
-              <img class="pcard-img" src="assets/opal-hero.png" alt="Opal Mobile design system documentation — Selector Pill usage patterns and guidelines">
-              <div class="pcard-grad"></div>
-              <div class="pcard-content">
-                <div class="pcard-head">
-                  <div>
-                    <div class="pcard-title">Opal Mobile Design System</div>
-                    <div class="pcard-sub">Fynd · Retail E-commerce</div>
-                  </div>
-                  <span class="pcard-emoji">📱</span>
-                </div>
-                <div class="pcard-pill" style="background:rgba(255,107,85,0.92);box-shadow:0 4px 14px rgba(255,107,85,0.45);">Design System</div>
-                <span class="pcard-cta">View project ↗</span>
-              </div>
-            </div>
+            <div class="folder-front"></div>
+            <div class="folder-shine"></div>
           </div>
-          <div class="pc-controls">
-            <button class="pc-arrow" id="pcPrev" aria-label="Previous project">‹</button>
-            <div class="pc-dots" id="pcDots"></div>
-            <button class="pc-arrow" id="pcNext" aria-label="Next project">›</button>
-          </div>
+          <h3 class="folder-title">Live Projects</h3>
+          <p class="folder-count">4 projects</p>
+          <p class="folder-hint">Hover to explore</p>
         </div>
-        <div style="margin-top:16px;text-align:right;">
-          <a href="https://sushavadhut.wixsite.com/sushmitaavadhut/case-studies" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#5D4FD7;text-decoration:none;padding:8px 16px;border:1.5px solid #5D4FD7;border-radius:20px;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='#5D4FD7';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#5D4FD7'">More Work →</a>
+        <div style="text-align:center;">
+          <a class="more-work" href="https://sushavadhut.wixsite.com/sushmitaavadhut/case-studies" target="_blank">More Work →</a>
         </div>
       </div>
 
       <!-- ─────────────────────────── EXPERIENCE CARD ─────────────────────────── -->
-      <div class="card" id="experience" style="left:2380px; top:840px;">
+      <div class="card" id="experience" style="left:1610px; top:720px;">
         <div class="ftree" id="expTree">
           <div class="ftree-bar">
             <span class="ftree-lights"><i></i><i></i><i></i></span>
@@ -1041,33 +1162,69 @@
       </div>
 
       <!-- ─────────────────────────── RESUME CARD ─────────────────────────── -->
-      <div class="card" id="resume" style="left:2220px; top:100px;">
-        <div class="card-label"><span></span> Resume</div>
-        <div class="resume-preview">
-          <img src="assets/positive-thinking-award.png" alt="Certificate: This positive thinking award has been presented to YOU for being a very attractive human being — keep up the good work!" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1;">
+      <div class="card" id="resume" style="left:1660px; top:150px;">
+        <div class="rz-visual" aria-hidden="true">
+          <div class="rz-glow"></div>
+          <div class="rz-grid"></div>
+          <div class="rz-chart">
+            <div class="rz-line">
+              <svg viewBox="0 0 356 180" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <g clip-path="url(#rzclip)">
+                  <path d="M1 131.5L33.5 125.5L64 102.5L93.5 118.5L124.5 90L154 100.5L183.5 76L207.5 92L244.5 51L274.5 60.5L307.5 46L334.5 28.5L356.5 1" stroke="#FF6B55"/>
+                  <path d="M33.5 125.5L1 131.5V197H356.5V1L335 28.5L306.5 46L274.5 60.5L244.5 51L207.5 92L183.5 76L154 100.5L124.5 90L93.5 118.5L64 102.5L33.5 125.5Z" fill="#FF6B55" fill-opacity="0.3"/>
+                </g>
+                <defs><clipPath id="rzclip"><rect width="356" height="180" fill="white"/></clipPath></defs>
+              </svg>
+              <div class="rz-reveal"></div>
+            </div>
+            <div class="rz-bars">
+              <svg viewBox="0 0 712 180" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 178C8 176.343 9.34315 175 11 175H25C26.6569 175 28 176.343 28 178V196H8V178Z" fill="#FF6B55"/>
+                <path d="M32 168C32 166.343 33.3431 165 35 165H49C50.6569 165 52 166.343 52 168V196H32V168Z" fill="#FF9D70"/>
+                <path d="M67 173C67 171.343 68.3431 170 70 170H84C85.6569 170 87 171.343 87 173V196H67V173Z" fill="#FF6B55"/>
+                <path d="M91 153C91 151.343 92.3431 150 94 150H108C109.657 150 111 151.343 111 153V196H91V153Z" fill="#FF9D70"/>
+                <path d="M126 142C126 140.343 127.343 139 129 139H143C144.657 139 146 140.343 146 142V196H126V142Z" fill="#FF6B55"/>
+                <path d="M150 158C150 156.343 151.343 155 153 155H167C168.657 155 170 156.343 170 158V196H150V158Z" fill="#FF9D70"/>
+                <path d="M187 133C187 131.343 188.343 130 190 130H204C205.657 130 207 131.343 207 133V196H187V133Z" fill="#FF6B55"/>
+                <path d="M211 161C211 159.343 212.343 158 214 158H228C229.657 158 231 159.343 231 161V196H211V161Z" fill="#FF9D70"/>
+                <path d="M248 150C248 148.343 249.343 147 251 147H265C266.657 147 268 148.343 268 150V196H248V150Z" fill="#FF6B55"/>
+                <path d="M272 130C272 128.343 273.343 127 275 127H289C290.657 127 292 128.343 292 130V196H272V130Z" fill="#FF9D70"/>
+                <path d="M307 133C307 131.343 308.343 130 310 130H324C325.657 130 327 131.343 327 133V196H307V133Z" fill="#FF6B55"/>
+                <path d="M331 155C331 153.343 332.343 152 334 152H348C349.657 152 351 153.343 351 155V196H331V155Z" fill="#FF9D70"/>
+                <path d="M363 161C363 159.343 364.343 158 366 158H380C381.657 158 383 159.343 383 161V196H363V161Z" fill="#FF6B55"/>
+                <path d="M387 144C387 142.343 388.343 141 390 141H404C405.657 141 407 142.343 407 144V196H387V144Z" fill="#FF9D70"/>
+                <path d="M423 126C423 124.343 424.343 123 426 123H440C441.657 123 443 124.343 443 126V196H423V126Z" fill="#FF6B55"/>
+                <path d="M447 142C447 140.343 448.343 139 450 139H464C465.657 139 467 140.343 467 142V196H447V142Z" fill="#FF9D70"/>
+                <path d="M483 125.461C483 124.102 484.343 123 486 123H500C501.657 123 503 124.102 503 125.461V196H483V125.461Z" fill="#FF6B55"/>
+                <path d="M507 137.507C507 136.122 508.343 135 510 135H524C525.657 135 527 136.122 527 137.507V196H507V137.507Z" fill="#FF9D70"/>
+                <path d="M543 108.212C543 106.438 544.343 105 546 105H560C561.657 105 563 106.438 563 108.212V196H543V108.212Z" fill="#FF6B55"/>
+                <path d="M567 116.485C567 115.112 568.343 114 570 114H584C585.657 114 587 115.112 587 116.485V196H567V116.485Z" fill="#FF9D70"/>
+                <path d="M603 79.8333C603 78.2685 604.343 77 606 77H620C621.657 77 623 78.2685 623 79.8333V196H603V79.8333Z" fill="#FF6B55"/>
+                <path d="M627 91.8919C627 90.2947 628.343 89 630 89H644C645.657 89 647 90.2947 647 91.8919V196H627V91.8919Z" fill="#FF9D70"/>
+                <path d="M661 66.7887C661 65.2485 662.343 64 664 64H678C679.657 64 681 65.2485 681 66.7887V196H661V66.7887Z" fill="#FF6B55"/>
+                <path d="M685 55.7325C685 54.2233 686.343 53 688 53H702C703.657 53 705 54.2233 705 55.7325V196H685V55.7325Z" fill="#FF9D70"/>
+              </svg>
+            </div>
+          </div>
+          <div class="rz-pills">
+            <span class="rz-pill">Industry Experience 4+ years</span>
+            <span class="rz-pill">Education 5 years</span>
+          </div>
         </div>
-        <div class="resume-name">Sushmita Avadhut</div>
-        <div class="resume-sub">Product Builder, leading Supply Chain · UX Thinker</div>
-        <div class="resume-badge">✦ Updated 2026</div>
-        <a class="btn-p" href="assets/Sushmita-Avadhut-Resume-2026.pdf" target="_blank" style="width:100%;justify-content:center;margin-bottom:16px;">Open Full Resume ↗</a>
-        <div class="card-label" style="margin-bottom:12px;"><span></span> Education</div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div>
-            <div style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:2px;">Bachelor of Design (B.Des) - Product Design</div>
-            <div style="font-size:11.5px;color:var(--ink-muted);margin-bottom:4px;">MIT Institute of Design | Aug 2018 - May 2022 | Pune</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);">CGPA: 8.64 | SGPA 10.00</div>
-          </div>
-          <div style="height:1px;background:var(--border);"></div>
-          <div>
-            <div style="font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:2px;">HSC - Science</div>
-            <div style="font-size:11.5px;color:var(--ink-muted);margin-bottom:4px;">Dr. Kalmadi Shamrao Junior College | Aug 2016 - 2018 | Pune</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);">CGPA: 7.86</div>
-          </div>
+        <div class="rz-body">
+          <div class="rz-role">Sr. Product Designer</div>
+          <div class="rz-entry-title">Bachelor of Design (B.Des) – Product Design</div>
+          <div class="rz-entry-meta">MIT Institute of Design | Aug 2018 – May 2022 | Pune</div>
+          <div class="rz-entry-grade">CGPA: 8.64 | SGPA 10.00</div>
+          <div class="rz-divider"></div>
+          <div class="rz-entry-title">Basics of Web Development</div>
+          <div class="rz-entry-meta">Maharishi Karve Shree Shikshan Sanstha | 2024 | Pune</div>
+          <a class="rz-btn" href="assets/Sushmita-Avadhut-Resume-2026.pdf" target="_blank">View Resume ↗</a>
         </div>
       </div>
 
       <!-- ─────────────────────────── TOOLS CARD ─────────────────────────── -->
-      <div class="card" id="tools" style="left:1100px; top:1650px;">
+      <div class="card" id="tools" style="left:740px; top:1290px;">
         <div class="card-label"><span></span> Tools &amp; Skills</div>
         <h2 class="tools-h">What I Work With ⚡</h2>
 
@@ -1127,8 +1284,18 @@
         </div>
       </div>
 
+      <!-- ─────────────────────────── SKILLS JAR ─────────────────────────── -->
+      <div class="card" id="jar" style="left:720px; top:1810px;">
+        <div class="jar-stage">
+          <div class="jar-pile" id="jarPile"></div>
+          <img class="jar-img jar-open"   src="assets/jar-open.png"   alt="An open glass jar">
+          <img class="jar-img jar-closed" src="assets/jar-closed.png" alt="A closed glass jar full of skills">
+        </div>
+        <button class="jar-btn" id="jarBtn">Fill me ↓</button>
+      </div>
+
       <!-- ─────────────────────────── BLOGS CARD ─────────────────────────── -->
-      <div class="card" id="blogs" style="left:2120px; top:1580px;">
+      <div class="card" id="blogs" style="left:1640px; top:1300px;">
         <div class="card-label"><span></span> Thoughts &amp; Writing</div>
         <h2 class="blogs-h">Reflections ✍️</h2>
         <p class="blogs-sub">Ideas, learnings &amp; design musings</p>
@@ -1138,7 +1305,7 @@
             <a href="https://www.linkedin.com/posts/sushmita-avadhut-3850021b2_is-there-a-fine-for-not-posting-a-stitch-ugcPost-7441378485710905344-mkSv" target="_blank" style="text-decoration:none; color:inherit;">
               <div class="blog-title">Honest review: Google Stitch is fast, but not there yet</div>
               <div class="blog-meta">Published · LinkedIn</div>
-              <div class="blog-excerpt">Impressive idea-to-wireframe speed — but spacing issues, broken text hierarchy & no free canvas annotation means it's not replacing Figma for polished hi-fi work. The foundation's worth building on.</div>
+              <div class="blog-excerpt">Tried it for a Social Impact Game App.</div>
             </a>
           </div>
         </div>
@@ -1148,11 +1315,14 @@
             <a href="https://www.linkedin.com/posts/fynd-shopsense_humans-of-fynd-activity-7463483901118865409-xzlh?utm_source=share&utm_medium=member_desktop&rcm=ACoAADF6b5UBD7Pt7_peZl7aR1z1KtNRHYvRmtM" target="_blank" style="text-decoration:none; color:inherit;">
               <div class="blog-title">On Humans of Fynd: know me</div>
               <div class="blog-meta">Featured · LinkedIn</div>
-              <div class="blog-excerpt">Fynd's Humans of Fynd series featured me — a look beyond the work at who I am, what drives me, and how I show up as a designer.</div>
+              <div class="blog-excerpt">A look beyond the work — who I am & what drives me.</div>
             </a>
           </div>
         </div>
-        <a class="blogs-li" href="https://www.linkedin.com/in/sushmita-avadhut-3850021b2/" target="_blank">🔗 Follow on LinkedIn for updates →</a>
+        <a class="blogs-li" href="https://www.linkedin.com/in/sushmita-avadhut-3850021b2/" target="_blank">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="24" height="24" rx="5" fill="#0A66C2"/><path fill="#fff" d="M8.34 18.5H5.67V9.98h2.67V18.5zM7 8.8a1.55 1.55 0 110-3.1 1.55 1.55 0 010 3.1zm11.5 9.7h-2.66v-4.15c0-.99-.02-2.27-1.38-2.27-1.39 0-1.6 1.08-1.6 2.2v4.22h-2.66V9.98h2.56v1.16h.04c.36-.67 1.22-1.38 2.52-1.38 2.7 0 3.2 1.78 3.2 4.08v4.66z"/></svg>
+          Connect on LinkedIn ↗
+        </a>
       </div>
 
       <!-- ─────────────────────────── AURA STICKER ─────────────────────────── -->
@@ -1162,29 +1332,15 @@
       </div>
 
       <!-- FLOATING EMOJIS (decorative) -->
-      <div class="float-emoji" style="left:2080px;top:700px;">🌍</div>
-      <div class="float-emoji" style="left:430px;top:230px;">🎯</div>
-      <div class="float-emoji" style="left:1850px;top:1700px;">⚡</div>
-      <div class="float-emoji" style="left:1050px;top:1620px;">🧩</div>
+      <div class="float-emoji" style="left:1560px;top:1540px;">⚡</div>
 
       <!-- STICKERS -->
-      <img class="sticker" style="position:absolute; left:330px; top:678px; width:150px; transform:rotate(-10deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_talk_data_t.svg" alt="">
-      <img class="sticker" style="position:absolute; left:332px; top:852px; width:150px; transform:rotate(-4deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_working_t.png" alt="Illustration of Sushmita sitting cross-legged working on a laptop">
-      <img class="sticker" style="position:absolute; left:1940px; top:1490px; width:110px; transform:rotate(8deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_brain_t.svg" alt="">
-      <img class="sticker" style="position:absolute; left:1395px; top:278px; width:90px; transform:rotate(-8deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_nazar_t.svg" alt="">
-      <img class="sticker" style="position:absolute; left:920px; top:1750px; width:110px; transform:rotate(-10deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_globe_t.svg" alt="">
-      <img class="sticker" style="position:absolute; left:1890px; top:2000px; width:120px; transform:rotate(12deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_breakingprod_t.svg" alt="">
-      <img class="sticker" style="position:absolute; left:2830px; top:1250px; width:140px; transform:rotate(-8deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_gta_t.svg" alt="">
-      <img class="sticker" style="position:absolute; left:2588px; top:235px; width:165px; transform:rotate(7deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_celebrate_t.png" alt="Illustration of Sushmita celebrating with arms and leg raised">
-      <img class="sticker" style="position:absolute; left:812px; top:300px; width:170px; transform:rotate(-6deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_idea_t.png" alt="Illustration of Sushmita holding a lightbulb and a puzzle piece">
+      <img class="sticker" style="position:absolute; left:370px; top:1080px; width:150px; transform:rotate(-4deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_working_t.png" alt="Illustration of Sushmita sitting cross-legged working on a laptop">
+      <img class="sticker" style="position:absolute; left:1490px; top:1190px; width:110px; transform:rotate(8deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_brain_t.svg" alt="">
+      <img class="sticker" style="position:absolute; left:1480px; top:250px; width:90px; transform:rotate(-8deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_nazar_t.svg" alt="">
+      <img class="sticker" style="position:absolute; left:2080px; top:1180px; width:140px; transform:rotate(-8deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_gta_t.svg" alt="">
+      <img class="sticker" style="position:absolute; left:1130px; top:220px; width:170px; transform:rotate(-6deg); filter:drop-shadow(0 6px 20px rgba(0,0,0,0.13));" src="assets/sticker_idea_t.png" alt="Illustration of Sushmita holding a lightbulb and a puzzle piece">
 
-      <!-- SECTION MARKERS (hand-written label feel) -->
-      <div class="section-marker" style="left:513px;top:718px;">Work</div>
-      <div class="section-marker" style="left:983px;top:68px;">About</div>
-      <div class="section-marker" style="left:2383px;top:798px;">Experience</div>
-      <div class="section-marker" style="left:2208px;top:58px;">Resume</div>
-      <div class="section-marker" style="left:1088px;top:1622px;">Skills</div>
-      <div class="section-marker" style="left:2108px;top:1555px;">Blog</div>
 
     </div><!-- /canvas-world -->
   </main>
@@ -1239,17 +1395,19 @@
     let velX = 0, velY = 0;
     let raf, inertiaActive = false;
     const MAX_SCALE = 2.5;
+    const MIN_SCALE = 0.9;   // furthest zoom-out (keeps cards comfortably readable)
     const DOT_BASE  = 28; // base dot grid size in px
 
     // Card bounding boxes (left, top, width, height in world-px)
     const CARDS = {
-      hero:       { x: 1380, y: 820,  w: 540, h: 380 },
-      about:      { x: 980,  y: 110,  w: 400, h: 470 },
-      work:       { x: 510,  y: 760,  w: 490, h: 560 },
-      experience: { x: 2380, y: 840,  w: 445, h: 460 },
-      resume:     { x: 2220, y: 100,  w: 360, h: 500 },
-      tools:      { x: 1100, y: 1650, w: 680, h: 470 },
-      blogs:      { x: 2120, y: 1580, w: 400, h: 440 },
+      hero:       { x: 1010, y: 710,  w: 540, h: 440 },
+      about:      { x: 660,  y: 160,  w: 400, h: 470 },
+      work:       { x: 520,  y: 740,  w: 400, h: 400 },
+      experience: { x: 1610, y: 720,  w: 445, h: 460 },
+      resume:     { x: 1660, y: 150,  w: 430, h: 460 },
+      tools:      { x: 740,  y: 1290, w: 680, h: 470 },
+      blogs:      { x: 1640, y: 1300, w: 400, h: 440 },
+      jar:        { x: 720,  y: 1810, w: 300, h: 280 },
     };
 
     // Bounding box of ALL cards + padding
@@ -1272,8 +1430,21 @@
       return Math.min(vpW() / bw, vpH() / bh);
     }
 
+    // Clamp pan so the cards bbox stays within the viewport (small overscroll margin)
+    function clampPan(x, y) {
+      const s = scale, top = 58, vw = vpW(), vh = vpH(), margin = 70;
+      const L = ALL_BBOX.left * s,  R = ALL_BBOX.right * s;
+      const T = ALL_BBOX.top * s,   B = ALL_BBOX.bottom * s;
+      const minX = vw - margin - R, maxX = margin - L;
+      const minY = top + vh - margin - B, maxY = top + margin - T;
+      x = (minX > maxX) ? (minX + maxX) / 2 : Math.max(minX, Math.min(maxX, x));
+      y = (minY > maxY) ? (minY + maxY) / 2 : Math.max(minY, Math.min(maxY, y));
+      return { x, y };
+    }
+
     // ── CORE TRANSFORM ──
     function applyTransform() {
+      const c = clampPan(wx, wy); wx = c.x; wy = c.y;
       world.style.transform = `translate(${wx}px,${wy}px) scale(${scale})`;
       // FigJam-style grid: stays at constant screen-space density regardless of zoom.
       // Only pan the grid position — never scale background-size.
@@ -1290,7 +1461,7 @@
 
     // ── ZOOM LOGIC ──
     function zoomAt(cx, cy, newScale) {
-      newScale = Math.max(computeMinScale(), Math.min(MAX_SCALE, newScale));
+      newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
       const factor = newScale / scale;
       wx = cx - (cx - wx) * factor;
       wy = cy - (cy - wy) * factor;
@@ -1308,7 +1479,7 @@
     window.fitAll = function() {
       cancelAnimationFrame(raf);
       inertiaActive = false; velX = velY = 0;
-      const s = computeMinScale();
+      const s = MIN_SCALE;
       const bCX = (ALL_BBOX.left + ALL_BBOX.right)  / 2;
       const bCY = (ALL_BBOX.top  + ALL_BBOX.bottom) / 2;
       const tx  = vCX() - bCX * s;
@@ -1341,56 +1512,92 @@
     init();
     window.addEventListener('resize', init);
 
-    // ── INTERACTIVE PROJECT CAROUSEL + 3D TILT ──
+    // ── SKILLS JAR · "Fill me" pours the tool logos into the jar ──
     (function(){
-      const stage = document.getElementById('pcStage');
-      if (!stage) return;
-      const cards   = Array.from(stage.querySelectorAll('.pcard'));
-      const dotsWrap = document.getElementById('pcDots');
-      const prevBtn = document.getElementById('pcPrev');
-      const nextBtn = document.getElementById('pcNext');
-      const REST = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
-      let idx = 0;
+      const jar = document.getElementById('jar');
+      const pile = document.getElementById('jarPile');
+      const btn = document.getElementById('jarBtn');
+      const tools = document.getElementById('tools');
+      if (!jar || !pile || !btn || !tools) return;
+      const world = document.getElementById('canvas-world');
+      const src = Array.from(tools.querySelectorAll('.tool-tile'));
+      // World coords of the cards (must match their inline left/top)
+      const TOOLS_X = 720, TOOLS_Y = 1290;
+      const JAR_X = 720, JAR_Y = 1810;
+      // Centre of the jar body (jar-stage top-left + pile centre)
+      const PILE_CX = JAR_X + 26 + 116 / 2;   // 804
+      const PILE_CY = JAR_Y + 78 + 104 / 2;   // 1940
+      let built = false, filled = false, closeTimer = null;
+      const flights = [];
 
-      cards.forEach((_, i) => {
-        const d = document.createElement('button');
-        d.className = 'pc-dot' + (i === 0 ? ' active' : '');
-        d.setAttribute('aria-label', 'Go to project ' + (i + 1));
-        d.addEventListener('click', () => go(i));
-        dotsWrap.appendChild(d);
-      });
-      const dots = Array.from(dotsWrap.children);
-
-      function go(n){
-        idx = (n + cards.length) % cards.length;
-        cards.forEach((c, i) => {
-          const on = i === idx;
-          c.classList.toggle('is-active', on);
-          if (!on) { c.style.transition = ''; c.style.transform = ''; }
-          else c.style.transform = REST;
+      function build(){
+        src.forEach((s, i) => {
+          const sx = TOOLS_X + s.offsetLeft;   // tile's world top-left
+          const sy = TOOLS_Y + s.offsetTop;
+          const el = document.createElement('div');
+          el.className = 'flight-tile';
+          el.innerHTML = s.innerHTML;
+          el.style.left = sx + 'px';
+          el.style.top  = sy + 'px';
+          el.style.opacity = '0';
+          world.appendChild(el);
+          // jumbled resting spot inside the jar
+          const rx = Math.random() * 72 - 36;
+          const ry = Math.random() * 60 - 30;
+          const rot = Math.random() * 56 - 28;
+          const dx = (PILE_CX + rx) - sx - 23;   // 23 = half tile
+          const dy = (PILE_CY + ry) - sy - 23;
+          flights.push({ el, dx, dy, rot, i });
         });
-        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        built = true;
       }
-      prevBtn.addEventListener('click', () => go(idx - 1));
-      nextBtn.addEventListener('click', () => go(idx + 1));
 
-      cards.forEach(card => {
-        card.addEventListener('mousemove', e => {
-          if (!card.classList.contains('is-active')) return;
-          const r = card.getBoundingClientRect();
-          const rx = ((e.clientY - r.top)  - r.height / 2) / (r.height / 2) * -8;
-          const ry = ((e.clientX - r.left) - r.width  / 2) / (r.width  / 2) *  8;
-          card.style.transition = 'transform 0.1s ease-out';
-          card.style.transform  = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.05,1.05,1.05)`;
+      function dropIn(){
+        flights.forEach(f => {
+          f.el.style.transitionDelay = (f.i * 0.09).toFixed(2) + 's';
+          f.el.style.opacity = '1';
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            f.el.style.transform = `translate(${f.dx}px,${f.dy}px) rotate(${f.rot}deg)`;
+          }));
         });
-        card.addEventListener('mouseleave', () => {
-          if (!card.classList.contains('is-active')) return;
-          card.style.transition = 'transform 0.4s ease-in-out';
-          card.style.transform  = REST;
+      }
+      function flyBack(){
+        flights.forEach(f => {
+          f.el.style.transitionDelay = (f.i * 0.04).toFixed(2) + 's';
+          f.el.style.transform = 'none';
+          f.el.style.opacity = '0';
         });
-        card.addEventListener('click', () => {
-          const link = card.getAttribute('data-link');
-          if (link) window.open(link, '_blank');
+      }
+
+      btn.addEventListener('click', () => {
+        if (!built) build();
+        filled = !filled;
+        clearTimeout(closeTimer);
+        if (filled) {
+          jar.classList.remove('closed');     // open jar while filling
+          tools.classList.add('emptied');     // card icons hand off to the falling clones
+          btn.textContent = 'Open me ↑';
+          dropIn();
+          const settle = src.length * 90 + 950;   // after the last tile lands…
+          closeTimer = setTimeout(() => { if (filled) jar.classList.add('closed'); }, settle);
+        } else {
+          jar.classList.remove('closed');     // pop the lid
+          btn.textContent = 'Fill me ↓';
+          flyBack();
+          setTimeout(() => { if (!filled) tools.classList.remove('emptied'); }, 250);
+        }
+      });
+    })();
+
+    // ── ANIMATED FOLDER · project card → open project in a new tab ──
+    (function(){
+      const folder = document.getElementById('liveFolder');
+      if (!folder) return;
+      folder.querySelectorAll('.fcard').forEach(c => {
+        c.addEventListener('click', e => {
+          e.stopPropagation();
+          const link = c.dataset.link;
+          if (link) window.open(link, '_blank', 'noopener');
         });
       });
     })();
@@ -1465,7 +1672,7 @@
     }
 
     window.jumpTo = function(id) {
-      const targetScale = Math.min(MAX_SCALE, Math.max(computeMinScale(), 1));
+      const targetScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, 1));
       const { tx, ty } = centreOnCard(id, targetScale);
       animateToScale(tx, ty, targetScale);
     };
