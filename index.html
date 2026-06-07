@@ -899,9 +899,16 @@
       display: flex; align-items: center; justify-content: center; will-change: transform;
       transition: transform 0.9s cubic-bezier(0.45,0.05,0.6,1), opacity 0.3s ease;
     }
-    .flight-tile > svg, .flight-tile > img { width: 26px; height: 26px; object-fit: contain; display: block; }
+    .flight-tile > svg, .flight-tile > img { width: 30px; height: 30px; object-fit: contain; display: block; }
     @media (prefers-reduced-motion: reduce) { .flight-tile { transition: opacity 0.3s ease; } }
-    #tools.emptied .tool-tile { opacity: 0; pointer-events: none; }
+    /* new skills hidden until the jar is filled */
+    .new-skill { display: none; }
+    #tools.emptied .tool-tile:not(.new-skill) { display: none; }
+    #tools.emptied .new-skill { display: flex; animation: skillIn 0.5s ease both; animation-delay: 0.5s; }
+    .sh-alt { display: none; }
+    #tools.emptied .sh-default { display: none; }
+    #tools.emptied .sh-alt { display: inline; }
+    @keyframes skillIn { from { opacity: 0; transform: translateY(10px) scale(0.85); } to { opacity: 1; transform: none; } }
     .tool-tile { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, opacity 0.45s ease; }
     @media (prefers-reduced-motion: reduce) { .jar-tile { transition: opacity 0.3s ease; } }
   </style>
@@ -999,20 +1006,19 @@
           </div>
           <div class="about-cover-grad"></div>
           <div class="card-label"><span></span> About Me</div>
-          <h2 class="about-h">Hey, I'm Sushmita 👋</h2>
           <div class="about-hint">hover to peek behind the curtain</div>
         </div>
         <div class="about-reveal">
           <div class="about-reveal-inner">
             <div class="about-eyebrow"><span></span> About Me</div>
-            <p class="about-p">A <em>Senior Product Designer</em> drawn to AI commerce, enterprise complexity, and the behavioural psychology that shapes how people use products. I believe good design is <em>honest design</em> — tell users what's coming, take the unnecessary work off them, and the friction takes care of itself. I work <em>end-to-end</em>, from research to shipped product.</p>
+            <p class="about-p">A <em>Senior Product Designer</em> drawn to AI commerce, enterprise complexity, and the behavioral psychology that shapes how people use products. I believe good design is <em>honest design</em> — tell users what's coming, take the unnecessary work off them, and the friction takes care of itself. I work <em>end-to-end</em>, from research to shipped product.</p>
             <p class="about-p">Outside work, you'll find me sketching, with <em>Aura</em>, or chasing a workout or swim.</p>
             <div class="about-chips">
-              <span class="about-chip">💃 Dancer</span>
-              <span class="about-chip">🐾 Animal Lover</span>
-              <span class="about-chip">🧘 Yoga</span>
-              <span class="about-chip">📚 Reader</span>
-              <span class="about-chip">✏️ Sketcher</span>
+              <span class="tag">💃 Dancer</span>
+              <span class="tag mint">🐾 Animal Lover</span>
+              <span class="tag coral">🧘 Yoga</span>
+              <span class="tag dark">📚 Reader</span>
+              <span class="tag yellow">✏️ Sketcher</span>
             </div>
           </div>
         </div>
@@ -1066,7 +1072,7 @@
           <p class="folder-hint">Hover to explore</p>
         </div>
         <div style="text-align:center;">
-          <a class="more-work" href="https://sushavadhut.wixsite.com/sushmitaavadhut/case-studies" target="_blank">More Work →</a>
+          <a class="more-work" href="https://sushavadhut.wixsite.com/sushmitaavadhut/case-studies" target="_blank">Previous Work →</a>
         </div>
       </div>
 
@@ -1216,9 +1222,6 @@
           <div class="rz-entry-title">Bachelor of Design (B.Des) – Product Design</div>
           <div class="rz-entry-meta">MIT Institute of Design | Aug 2018 – May 2022 | Pune</div>
           <div class="rz-entry-grade">CGPA: 8.64 | SGPA 10.00</div>
-          <div class="rz-divider"></div>
-          <div class="rz-entry-title">Basics of Web Development</div>
-          <div class="rz-entry-meta">Maharishi Karve Shree Shikshan Sanstha | 2024 | Pune</div>
           <a class="rz-btn" href="assets/Sushmita-Avadhut-Resume-2026.pdf" target="_blank">View Resume ↗</a>
         </div>
       </div>
@@ -1234,7 +1237,6 @@
             <span class="chip">Design Research</span>
             <span class="chip">Mobile Design Systems</span>
             <span class="chip">SaaS &amp; Enterprise Solution</span>
-            <span class="chip">Problem Solving</span>
             <span class="chip">Rapid Prototyping / UI</span>
             <span class="chip">E-commerce</span>
             <span class="chip">Design Strategy</span>
@@ -1242,7 +1244,7 @@
         </div>
 
         <div class="tools-section">
-          <div class="tools-sh">Design &amp; Craft</div>
+          <div class="tools-sh"><span class="sh-default">Design &amp; Craft</span><span class="sh-alt">Strategy &amp; Build</span></div>
           <div class="tool-grid">
             <span class="tool-tile" data-tip="Figma">
               <svg viewBox="0 0 38 57" xmlns="http://www.w3.org/2000/svg" aria-label="Figma">
@@ -1262,12 +1264,17 @@
             <span class="tool-tile" data-tip="Miro">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Miro"><rect width="24" height="24" rx="5.5" fill="#FFD23E"/><g transform="translate(4.3 4.3) scale(0.64)"><path fill="#050038" d="M17.392 0H13.9L17 4.808 10.444 0H6.949l3.102 6.3L3.494 0H0l3.05 8.131L0 24h3.494L10.05 6.985 6.949 24h3.494L17 5.494 13.899 24h3.493L24 3.672 17.392 0z"/></g></svg>
             </span>
+            <span class="tool-tile new-skill" data-tip="GitHub"><img src="assets/logo-github.png" alt="GitHub"></span>
+            <span class="tool-tile new-skill" data-tip="Vercel v0"><img src="assets/logo-v0.png" alt="Vercel v0"></span>
+            <span class="tool-tile new-skill" data-tip="Replit"><img src="assets/logo-replit.png" alt="Replit"></span>
+            <span class="tool-tile new-skill" data-tip="Subframe"><img src="assets/logo-subframe.png" alt="Subframe"></span>
+            <span class="tool-tile new-skill" data-tip="GitHub Copilot"><img src="assets/logo-copilot.png" alt="GitHub Copilot"></span>
             <span class="tool-plus">+</span>
           </div>
         </div>
 
         <div class="tools-section" style="margin-bottom:0;">
-          <div class="tools-sh">AI &amp; Build</div>
+          <div class="tools-sh"><span class="sh-default">AI &amp; Build</span><span class="sh-alt">Industrial 3D Design</span></div>
           <div class="tool-grid">
             <span class="tool-tile" data-tip="Claude Code">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Claude"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>
@@ -1279,6 +1286,9 @@
             <span class="tool-tile" data-tip="Gemini">
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-label="Gemini"><defs><linearGradient id="gemGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4796E3"/><stop offset="50%" stop-color="#9177C7"/><stop offset="100%" stop-color="#D96570"/></linearGradient></defs><path fill="url(#gemGrad)" d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>
             </span>
+            <span class="tool-tile new-skill" data-tip="Rhino 3D"><img src="assets/logo-rhino.png" alt="Rhino 3D"></span>
+            <span class="tool-tile new-skill" data-tip="Fusion 360"><img src="assets/logo-fusion360.png" alt="Autodesk Fusion 360"></span>
+            <span class="tool-tile new-skill" data-tip="KeyShot"><img src="assets/logo-keyshot.png" alt="KeyShot"></span>
             <span class="tool-plus">+</span>
           </div>
         </div>
@@ -1519,7 +1529,7 @@
       const tools = document.getElementById('tools');
       if (!jar || !pile || !btn || !tools) return;
       const world = document.getElementById('canvas-world');
-      const src = Array.from(tools.querySelectorAll('.tool-tile'));
+      const src = Array.from(tools.querySelectorAll('.tool-tile:not(.new-skill)'));
       // World coords of the cards (must match their inline left/top)
       const TOOLS_X = 720, TOOLS_Y = 1290;
       const JAR_X = 720, JAR_Y = 1810;
@@ -1529,13 +1539,50 @@
       let built = false, filled = false, closeTimer = null;
       const flights = [];
 
+      // ── sound effects (triggered by the Fill me click → allowed by autoplay policy) ──
+      const sfxTiles = new Audio('assets/sfx-tiles.mp3');   // tiles falling
+      const sfxClose = new Audio('assets/sfx-close.mp3');   // lid closing
+      sfxTiles.preload = 'auto'; sfxClose.preload = 'auto';
+      let sfxFadeT = null, sfxFadeI = null;
+      function playFall(){
+        clearTimeout(sfxFadeT); clearInterval(sfxFadeI);
+        try { sfxTiles.pause(); sfxTiles.currentTime = 0; sfxTiles.volume = 0.7; sfxTiles.play(); } catch(e){}
+        // trim to roughly the fall-animation length (~1.8s) with a short fade-out
+        sfxFadeT = setTimeout(() => {
+          sfxFadeI = setInterval(() => {
+            sfxTiles.volume = Math.max(0, sfxTiles.volume - 0.12);
+            if (sfxTiles.volume <= 0.02) { sfxTiles.pause(); clearInterval(sfxFadeI); }
+          }, 45);
+        }, 1500);
+      }
+      function stopFall(){
+        clearTimeout(sfxFadeT); clearInterval(sfxFadeI);
+        try { sfxTiles.pause(); sfxTiles.currentTime = 0; } catch(e){}
+      }
+      let sfxCloseFadeT = null, sfxCloseFadeI = null;
+      function playClose(fadeAfter){
+        clearTimeout(sfxCloseFadeT); clearInterval(sfxCloseFadeI);
+        try { sfxClose.pause(); sfxClose.currentTime = 0; sfxClose.volume = 0.85; sfxClose.play(); } catch(e){}
+        if (fadeAfter) {
+          sfxCloseFadeT = setTimeout(() => {
+            sfxCloseFadeI = setInterval(() => {
+              sfxClose.volume = Math.max(0, sfxClose.volume - 0.15);
+              if (sfxClose.volume <= 0.02) { sfxClose.pause(); clearInterval(sfxCloseFadeI); }
+            }, 40);
+          }, fadeAfter);
+        }
+      }
+
       function build(){
         src.forEach((s, i) => {
           const sx = TOOLS_X + s.offsetLeft;   // tile's world top-left
           const sy = TOOLS_Y + s.offsetTop;
           const el = document.createElement('div');
           el.className = 'flight-tile';
-          el.innerHTML = s.innerHTML;
+          // scope any SVG ids/refs so cloned gradients render independent of the (hidden) originals
+          el.innerHTML = s.innerHTML
+            .replace(/id="([^"]+)"/g, (m, a) => 'id="' + a + '_f' + i + '"')
+            .replace(/url\(#([^)]+)\)/g, (m, a) => 'url(#' + a + '_f' + i + ')');
           el.style.left = sx + 'px';
           el.style.top  = sy + 'px';
           el.style.opacity = '0';
@@ -1577,21 +1624,35 @@
           tools.classList.add('emptied');     // card icons hand off to the falling clones
           btn.textContent = 'Open me ↑';
           dropIn();
+          playFall();                          // tiles-falling sound
           const settle = src.length * 90 + 950;   // after the last tile lands…
-          closeTimer = setTimeout(() => { if (filled) jar.classList.add('closed'); }, settle);
+          closeTimer = setTimeout(() => {
+            if (filled) { jar.classList.add('closed'); playClose(); }   // lid-closing sound
+          }, settle);
         } else {
           jar.classList.remove('closed');     // pop the lid
+          playClose(700);                      // lid-pop sound, trimmed to the quick open motion
           btn.textContent = 'Fill me ↓';
+          stopFall();
           flyBack();
           setTimeout(() => { if (!filled) tools.classList.remove('emptied'); }, 250);
         }
       });
     })();
 
-    // ── ANIMATED FOLDER · project card → open project in a new tab ──
+    // ── ANIMATED FOLDER · hover sound + project card → open project in a new tab ──
     (function(){
       const folder = document.getElementById('liveFolder');
       if (!folder) return;
+      // folder-open sound (0.62s ≈ the 600ms fan-out) — plays as the cards come out
+      const sfxFolder = new Audio('assets/sfx-folder.mp3');
+      sfxFolder.preload = 'auto'; sfxFolder.volume = 0.6;
+      folder.addEventListener('mouseenter', () => {
+        try { sfxFolder.currentTime = 0; sfxFolder.play(); } catch(e){}
+      });
+      folder.addEventListener('mouseleave', () => {
+        try { sfxFolder.pause(); sfxFolder.currentTime = 0; } catch(e){}
+      });
       folder.querySelectorAll('.fcard').forEach(c => {
         c.addEventListener('click', e => {
           e.stopPropagation();
