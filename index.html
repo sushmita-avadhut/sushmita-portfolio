@@ -911,9 +911,95 @@
     @keyframes skillIn { from { opacity: 0; transform: translateY(10px) scale(0.85); } to { opacity: 1; transform: none; } }
     .tool-tile { transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, opacity 0.45s ease; }
     @media (prefers-reduced-motion: reduce) { .jar-tile { transition: opacity 0.3s ease; } }
+
+    /* ─────────── LANDING INTRO (gooey pixel-trail reveals image → scroll dissolves to canvas) ─────────── */
+    #landing {
+      position: fixed; inset: 0; z-index: 2000; overflow: hidden;
+      background: var(--bg);                       /* cream cover; image hidden until the cursor reveals it */
+      transition: opacity 0.7s ease;
+    }
+    #landing.gone { opacity: 0; pointer-events: none; }
+    /* faint always-visible photo, with an 80% cream cover over it */
+    .ld-base { position: absolute; inset: 0; z-index: 0;
+      background: url('assets/landing-bg.jpg') center / cover no-repeat; }
+    .ld-cover { position: absolute; inset: 0; z-index: 1; background: var(--bg); opacity: 0.89; }
+    .ld-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 2; }
+    /* a soft warm wash so the cream cover reads as part of the site */
+    .ld-wash { position: absolute; inset: 0; z-index: 3; pointer-events: none;
+      background: radial-gradient(ellipse 80% 70% at 50% 42%, rgba(255,214,10,0.05), transparent 70%); }
+    .ld-center { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; pointer-events: none; padding: 24px;
+      transform: translateY(-160px); transition: opacity 0.25s ease; }
+    .ld-headline { position: relative; height: 1.3em; display: grid; place-items: center; }
+    .ld-line {
+      grid-area: 1 / 1; margin: 0; text-align: center; white-space: nowrap;
+      font-family: var(--font); font-weight: 800; color: var(--ink);
+      font-size: clamp(26px, 4.6vw, 50px); letter-spacing: -1.2px; line-height: 1.25;
+      opacity: 0; transition: opacity 0.7s ease;
+    }
+    .ld-line.show { opacity: 1; }
+    .ld-line .thin { font-weight: 400; color: var(--ink-soft); }
+    .ld-line .hl { background: var(--yellow); border-radius: 5px; padding: 0 7px; }
+    .ld-sound {
+      position: absolute; left: 50%; bottom: 86px; transform: translateX(-50%); z-index: 6;
+      pointer-events: auto; cursor: pointer;
+      width: 30px; height: 30px; border-radius: 50%; border: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.65); color: var(--ink-soft);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .ld-sound:hover { color: var(--ink); transform: translateX(-50%) translateY(-2px); }
+    .ld-sound svg { width: 15px; height: 15px; display: block; }
+    .ld-sound .ic-off { display: none; }
+    .ld-sound.muted .ic-on { display: none; }
+    .ld-sound.muted .ic-off { display: block; }
+    .ld-hint {
+      position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%); z-index: 5;
+      display: inline-flex; flex-direction: column; align-items: center; gap: 5px;
+      font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--ink-muted); pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .ld-hint .arr { font-size: 17px; animation: ld-bounce 1.5s ease-in-out infinite; }
+    @keyframes ld-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+    @media (prefers-reduced-motion: reduce) {
+      .ld-hint .arr { animation: none; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- ── LANDING INTRO · gooey pixel-trail reveals image, scroll dissolves to canvas ── -->
+  <div id="landing">
+    <div class="ld-base" aria-hidden="true"></div>
+    <div class="ld-cover" aria-hidden="true"></div>
+    <svg class="ld-svg" id="ldSvg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+      <defs>
+        <filter id="ld-goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+          <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="goo"/>
+        </filter>
+        <mask id="ld-mask">
+          <g id="ldTrail" filter="url(#ld-goo)"></g>
+        </mask>
+      </defs>
+      <image id="ldImg" href="assets/landing-bg.jpg" xlink:href="assets/landing-bg.jpg"
+             x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" mask="url(#ld-mask)"></image>
+    </svg>
+    <div class="ld-wash"></div>
+    <div class="ld-center">
+      <div class="ld-headline" aria-label="I design for clarity that builds trust">
+        <p class="ld-line show" data-i="0"><span>I design</span> <span class="thin">for</span> <span class="hl">clarity</span> <span class="thin">that builds</span> <span class="hl">trust</span><span class="thin">.</span></p>
+        <p class="ld-line" data-i="1"><span>I design</span> <span class="thin">for</span> <span class="hl">agents</span> <span class="thin">that feel</span> <span class="hl">human</span><span class="thin">.</span></p>
+      </div>
+    </div>
+    <button class="ld-sound muted" id="ldSound" aria-label="Toggle sound" aria-pressed="false">
+      <svg class="ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+      <svg class="ic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+    </button>
+    <div class="ld-hint">Scroll to enter <span class="arr">↓</span></div>
+  </div>
 
   <!-- ── DOG CURSOR ── -->
   <div id="dog-cursor"><img id="dog-img" src="assets/dog-cursor.svg" alt="running dog"></div>
@@ -2047,6 +2133,178 @@
       viewport.style.cursor = '';
       document.body.style.cursor = '';
     }
+  </script>
+
+  <!-- ── LANDING INTRO · gooey pixel-trail + scroll dissolve ── -->
+  <script>
+  (function(){
+    const landing = document.getElementById('landing');
+    if (!landing) return;
+    const svg   = document.getElementById('ldSvg');
+    const trail = document.getElementById('ldTrail');
+    const img   = document.getElementById('ldImg');
+    const SVGNS = 'http://www.w3.org/2000/svg';
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = matchMedia('(max-width: 767px)').matches;
+    const PIX  = isMobile ? 26 : 34;     // pixel-trail tile size
+    const LIFE = 600;                    // ms a pixel stays revealed before fading out
+    let dissolving = false;
+
+    // size the SVG coordinate space to the viewport
+    function sizeSvg(){
+      const w = window.innerWidth, h = window.innerHeight;
+      svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      svg.setAttribute('preserveAspectRatio', 'none');
+    }
+    sizeSvg();
+    window.addEventListener('resize', sizeSvg);
+
+    // ── ambient landing sound (loops; fades out on scroll). Autoplay needs a gesture,
+    //    so we attempt immediately and re-try on the first real user interaction. ──
+    const ambient = new Audio('assets/sfx-ambient.mp3');
+    ambient.volume = 0.45; ambient.preload = 'auto';
+    const SFX_START = 2;   // skip the silent 2s intro → start on the beat
+    ambient.addEventListener('loadedmetadata', () => { try { ambient.currentTime = SFX_START; } catch(e){} });
+    ambient.addEventListener('ended', () => { try { ambient.currentTime = SFX_START; ambient.play(); } catch(e){} });   // loop from the beat
+    let audioStarted = false, audioFading = false;
+    const GESTURES = ['pointerdown', 'click', 'keydown', 'touchstart', 'wheel'];
+    function startAudio(){
+      if (audioStarted || dissolving) return;
+      try { if (ambient.currentTime < SFX_START) ambient.currentTime = SFX_START; } catch(e){}
+      ambient.play().then(() => {
+        audioStarted = true;
+        GESTURES.forEach(ev => window.removeEventListener(ev, startAudio));
+      }).catch(() => {});
+    }
+    // starts muted on land — the speaker button below turns it on
+    // speaker toggle: first click enables sound, subsequent clicks mute/unmute
+    const soundBtn = document.getElementById('ldSound');
+    let wantSound = false;
+    if (soundBtn){
+      soundBtn.addEventListener('click', e => {
+        e.stopPropagation();                 // don't trigger the scroll-dissolve
+        if (!audioStarted || ambient.paused){
+          wantSound = true; startAudio(); ambient.play().catch(() => {});
+        } else {
+          wantSound = !wantSound;
+          if (wantSound) ambient.play().catch(() => {}); else ambient.pause();
+        }
+        soundBtn.classList.toggle('muted', !wantSound);
+        soundBtn.setAttribute('aria-pressed', String(wantSound));
+      });
+    }
+
+    function fadeAudio(){
+      if (audioFading) return; audioFading = true;
+      const v0 = ambient.volume, t0 = performance.now(), DUR = 900;
+      (function f(now){
+        const p = Math.min(1, (now - t0) / DUR);
+        ambient.volume = Math.max(0, v0 * (1 - p));
+        if (p < 1) requestAnimationFrame(f); else ambient.pause();
+      })(performance.now());
+    }
+
+    // ── headline crossfade (two sentences) ──
+    const lines = Array.from(landing.querySelectorAll('.ld-line'));
+    let li = 0, headTimer = null;
+    if (!reduce && lines.length > 1){
+      headTimer = setInterval(() => {
+        lines[li].classList.remove('show');
+        li = (li + 1) % lines.length;
+        lines[li].classList.add('show');
+      }, 3200);
+    }
+
+    // ── gooey pixel trail: snap to a grid, add a white rect, fade it out ──
+    const active = new Map();   // cellKey -> { el, t }
+    function revealCell(cx, cy){
+      const col = Math.floor(cx / PIX), row = Math.floor(cy / PIX);
+      const key = col + ',' + row;
+      const ex = active.get(key);
+      if (ex){ clearTimeout(ex.t); ex.t = setTimeout(() => removeCell(key), LIFE); return; }
+      const r = document.createElementNS(SVGNS, 'rect');
+      r.setAttribute('x', col * PIX); r.setAttribute('y', row * PIX);
+      r.setAttribute('width', PIX);   r.setAttribute('height', PIX);
+      r.setAttribute('fill', '#fff'); r.setAttribute('rx', 6);
+      trail.appendChild(r);
+      active.set(key, { el: r, t: setTimeout(() => removeCell(key), LIFE) });
+    }
+    function removeCell(key){
+      const c = active.get(key);
+      if (!c) return;
+      c.el.style.transition = 'opacity 0.35s ease';
+      c.el.style.opacity = '0';
+      setTimeout(() => { c.el.remove(); }, 360);
+      active.delete(key);
+    }
+    if (!reduce){
+      landing.addEventListener('pointermove', e => {
+        if (dissolving) return;
+        revealCell(e.clientX, e.clientY);
+      });
+    } else {
+      // reduced motion → reveal the whole image softly, no trail
+      const full = document.createElementNS(SVGNS, 'rect');
+      full.setAttribute('x', 0); full.setAttribute('y', 0);
+      full.setAttribute('width', '100%'); full.setAttribute('height', '100%');
+      full.setAttribute('fill', '#fff'); full.setAttribute('opacity', '0.5');
+      trail.appendChild(full);
+    }
+
+    // ── scroll → hide the text, then populate the grid in pixel blobs, then reveal canvas ──
+    function dissolve(){
+      if (dissolving) return; dissolving = true;
+      fadeAudio();
+      if (headTimer) { clearInterval(headTimer); headTimer = null; }
+      // remove the headline + hint completely before the reveal begins
+      const center = landing.querySelector('.ld-center'), hint = landing.querySelector('.ld-hint');
+      if (center) center.style.opacity = '0';
+      if (hint) hint.style.opacity = '0';
+      // clear any leftover cursor-trail pixels for a clean start
+      while (trail.firstChild) trail.removeChild(trail.firstChild);
+      setTimeout(runReveal, 300);   // wait for the text to fade out first
+
+      function runReveal(){
+        const w = window.innerWidth, h = window.innerHeight;
+        const cols = Math.ceil(w / PIX), rows = Math.ceil(h / PIX);
+        const cells = [];
+        for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push([c, r]);
+        // random fill order so the image "pixelates" in rather than wiping
+        for (let i = cells.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); const tmp = cells[i]; cells[i] = cells[j]; cells[j] = tmp; }
+        const DUR = 750, t0 = performance.now();
+        let idx = 0;
+        function step(now){
+          const p = Math.min(1, (now - t0) / DUR);
+          const targetCount = Math.floor(p * cells.length);
+          while (idx < targetCount){
+            const cell = cells[idx++];
+            const rect = document.createElementNS(SVGNS, 'rect');
+            rect.setAttribute('x', cell[0] * PIX); rect.setAttribute('y', cell[1] * PIX);
+            rect.setAttribute('width', PIX); rect.setAttribute('height', PIX);
+            rect.setAttribute('fill', '#fff'); rect.setAttribute('rx', 6);
+            trail.appendChild(rect);
+          }
+          if (p < 1) { requestAnimationFrame(step); return; }
+          landing.classList.add('gone');           // full image revealed → fade cover to the live canvas
+          setTimeout(() => { landing.style.display = 'none'; }, 750);
+        }
+        requestAnimationFrame(step);
+      }
+    }
+    // triggers: wheel, touch-swipe, key, or click
+    landing.addEventListener('wheel', dissolve, { passive: true });
+    let touchY = null;
+    landing.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+    landing.addEventListener('touchmove', e => {
+      if (touchY !== null && Math.abs(e.touches[0].clientY - touchY) > 22) dissolve();
+    }, { passive: true });
+    landing.addEventListener('click', dissolve);
+    window.addEventListener('keydown', e => {
+      if (dissolving) return;
+      if (['ArrowDown','ArrowUp','PageDown',' ','Enter'].includes(e.key)) dissolve();
+    });
+  })();
   </script>
 
 </body>
