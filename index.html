@@ -72,11 +72,11 @@
       border-bottom: 1px solid var(--border);
     }
     #logo {
-      font-size: 17px; font-weight: 800; color: var(--ink); letter-spacing: -0.5px;
-      cursor: pointer; padding: 5px 12px; border-radius: 10px;
-      border: 2px solid var(--ink); transition: all 0.18s; flex-shrink: 0;
+      font-family: 'Caveat', cursive; font-size: 28px; font-weight: 700;
+      color: var(--ink); line-height: 1; letter-spacing: 0; cursor: pointer;
+      padding: 0 2px; transition: color 0.18s, transform 0.18s; flex-shrink: 0; white-space: nowrap;
     }
-    #logo:hover { background: var(--ink); color: var(--bg); }
+    #logo:hover { color: var(--purple); transform: rotate(-2deg); }
     #nav-pills { display: flex; gap: 4px; flex: 1; justify-content: center; }
     #nav-pills button {
       font-family: var(--font); font-size: 12.5px; font-weight: 600; color: var(--ink-soft);
@@ -695,7 +695,7 @@
 
   <!-- ── TOP HUD ── -->
   <header id="hud-top">
-    <div id="logo" onclick="jumpTo('f-hero')">SA</div>
+    <div id="logo" onclick="jumpTo('f-hero')">Sushmita Avadhut</div>
     <nav id="nav-pills">
       <button data-target="f-work">Work</button>
       <button data-target="f-experience">Experience</button>
@@ -816,7 +816,7 @@
                     <span class="case-name">Fynd</span>
                     <span class="case-role">Self-Initiated · Product Builder</span>
                   </div>
-                  <a class="case-link" href="cardcapture-casestudy.html">View case study →</a>
+                  <a class="case-link" href="cardcapture-casestudy.html" target="_blank" rel="noopener">View case study →</a>
                 </figcaption>
               </figure>
             </div>
@@ -840,7 +840,7 @@
                     <span class="case-name">Agentic Interface</span>
                     <span class="case-role">Interaction Designer · Agent UX</span>
                   </div>
-                  <a class="case-link" href="agentic-experience-casestudy.html">View case study →</a>
+                  <a class="case-link" href="agentic-experience-casestudy.html" target="_blank" rel="noopener">View case study →</a>
                 </figcaption>
               </figure>
             </div>
