@@ -1,5 +1,6 @@
-.git
-.DS_Store
-*.log
-CLAUDE.md
+scroll-ScrollV1.html
 split-payment-source.md
+*.log
+.playwright-mcp
+.DS_Store
+CLAUDE.md
