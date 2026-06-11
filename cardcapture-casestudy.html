@@ -861,6 +861,35 @@
       transform: scale(1.03);
     }
 
+    /* ── Learning Curve image ──────────────────────────────── */
+    .learning-section .section-sub { max-width: none; }
+    .learning-image {
+      margin-top: 48px;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+    }
+    .learning-image img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+      will-change: transform;
+    }
+    .learning-image:hover img {
+      transform: scale(1.02);
+    }
+    .learning-caption {
+      margin-top: 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      text-align: center;
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     /* ── Stagger delay helpers ─────────────────────────────── */
     [data-delay="1"] { transition-delay: 0.08s; }
     [data-delay="2"] { transition-delay: 0.16s; }
@@ -1247,6 +1276,23 @@
       <span class="outcome-tag"><span class="dot"></span>Batch push for event debriefs</span>
       <span class="outcome-tag"><span class="dot"></span>CSV export for backup</span>
     </div>
+  </div>
+</section>
+
+<!-- ── Learning Curve ────────────────────────────────────── -->
+<section class="learning-section">
+  <div class="container">
+    <p class="section-eyebrow" data-a="up">Learning Curve</p>
+    <h2 class="section-title" data-a="up" data-delay="1">I shipped this while still learning to build it.</h2>
+    <p class="section-sub" data-a="up" data-delay="2">
+      I'm a designer first, not a full-stack engineer, so a lot of this build was unfamiliar ground. I treated that gap like a design problem: I kept a running designer's glossary that translated dev terms, API, FastAPI, latency, idempotency, cold-start, multipart POST, into language I actually understood, sketched the architecture by hand until it clicked, and mapped every workflow before writing the code. The notes below are that paper trail. And honestly, the learning hasn't stopped, every new build adds a few more pages.
+    </p>
+    <div class="learning-image" data-a="scale" data-delay="1">
+      <img src="images/learning-curve.png" alt="Research boards, hand-drawn architecture diagrams, and a designer's glossary of dev terms" />
+    </div>
+    <p class="learning-caption" data-a="up" data-delay="2">
+      Research boards, architecture sketches, and a hand-written dev glossary, my paper trail for teaching myself full-stack as a designer.
+    </p>
   </div>
 </section>
 
