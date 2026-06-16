@@ -577,9 +577,11 @@
       text-decoration: none; transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
     }
     .canvas-cta-btn:hover { background: #18244F; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,48,111,0.3); }
+    #liveFolder { transform: translate(42px, 200px); }
     @media (max-width: 900px) {
       .blog-canvas { flex-direction: column; gap: 40px; }
       #f-blog .deco { display: none; }
+      #liveFolder { transform: none; }
     }
 
     /* ── BLOGS CARD ── */
@@ -1178,7 +1180,7 @@
       </div>
 
       <!-- projects folder (right) — content updates on hover -->
-      <div class="folder-wrap" id="liveFolder" style="transform: translate(42px, 200px);">
+      <div class="folder-wrap" id="liveFolder">
         <div class="folder-stage">
           <div class="folder-back"></div>
           <div class="folder-tab"></div>
