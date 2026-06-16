@@ -382,7 +382,7 @@
     .case-stat .lbl { font-size: 15px; font-weight: 600; color: var(--ink); margin-top: 9px; }
     .case-stat .sub { font-size: 13px; color: var(--ink-muted); margin-top: 4px; }
     @media (max-width: 880px) {
-      .case { grid-template-columns: 1fr; gap: 30px; padding: 36px 0; }
+      .case, .case.reversed { grid-template-columns: 1fr; gap: 30px; padding: 36px 0; }
       .case-main, .case.reversed .case-main { order: 0; border: none; padding: 0; }
       .case-stats, .case.reversed .case-stats { order: 0; grid-template-columns: 1fr 1fr; gap: 24px; }
       .case-main { flex-direction: column; }
@@ -598,6 +598,12 @@
     .blogs-li svg { width: 22px; height: 22px; flex-shrink: 0; }
 
     /* ── FOOTER ── */
+    #f-experience, #f-skills, #f-about {
+      min-height: auto;
+      justify-content: flex-start;
+      padding-top: calc(var(--hud-top) + 32px);
+      padding-bottom: 52px;
+    }
     #f-footer { min-height: 60svh; }
     #f-footer .fold-inner { position: relative; z-index: 2; }
     /* spinning flowers top-left + puzzle illustration bottom-right */
@@ -1136,7 +1142,8 @@
     <img class="deco float" src="assets/sticker_brain_t.svg" alt="" style="left:45%; top:11%; width:76px; transform:rotate(-8deg);">
     <img class="deco float" src="assets/sticker_nazar_t.svg" alt="" style="right:5%; top:13%; width:64px; transform:rotate(8deg);">
     <img class="deco float" src="assets/sticker_gta_t.svg" alt="" style="right:31%; bottom:9%; width:104px; transform:rotate(6deg);">
-    <div class="aura-deco deco float" style="left:39%; bottom:13%;"><img src="assets/aura-dog.svg" width="76" alt="Aura the dog" style="transform:rotate(-6deg);"></div>
+    <div class="aura-mat-deco deco float" style="left:calc(72.3% - 120px); top:calc(38.8% - 120px); width:180px; z-index:1;"><img src="assets/aura-mat.png" width="180" alt="Decorative woven mat beneath Aura the dog"></div>
+    <div class="aura-deco deco float" id="auraSticker" style="left:66.9%; bottom:67.3%; z-index: 2;"><img src="assets/aura-dog.svg" width="91" alt="Aura the dog" style="transform:rotate(-6deg);"></div>
 
     <div class="blog-canvas reveal">
       <!-- blog card (left) -->
@@ -1171,37 +1178,37 @@
       </div>
 
       <!-- projects folder (right) — content updates on hover -->
-      <div class="folder-wrap" id="liveFolder">
+      <div class="folder-wrap" id="liveFolder" style="transform: translate(42px, 200px);">
         <div class="folder-stage">
           <div class="folder-back"></div>
           <div class="folder-tab"></div>
           <div class="folder-cards">
-            <div class="fcard" data-i="0" data-link="cardcapture-casestudy.html" data-title="CardCapture Workflow" data-sub="Self-Initiated · Fynd">
-              <img src="assets/cardcapture-hero.png" alt="Person scanning a business card with the CardCapture app on a phone">
+            <div class="fcard" data-i="0" data-link="assets/additional-quen.jpg" data-title="Bargaining App" data-sub="Concept · Fashion Bargaining">
+              <img src="assets/additional-quen.jpg" alt="Bargaining App fashion shopping concept with a price-history graph">
               <div class="fcard-grad"></div>
-              <div class="fcard-name">CardCapture</div>
+              <div class="fcard-name">Bargaining App</div>
             </div>
-            <div class="fcard" data-i="1" data-link="https://www.fynd.com/solutions/transport-management-system" data-title="Transport Management System" data-sub="Fynd · Retail E-commerce">
-              <img src="assets/tms-hero.png" alt="Logistics worker checking packages inside a green delivery truck on a tablet">
+            <div class="fcard" data-i="1" data-link="assets/additional-foreststout.jpg" data-title="3D Posters" data-sub="Packaging · Branding">
+              <img src="assets/additional-foreststout.jpg" alt="3D poster render of Forest Stout beer bottle packaging design">
               <div class="fcard-grad"></div>
-              <div class="fcard-name">Transport MS</div>
+              <div class="fcard-name">3D Posters</div>
             </div>
-            <div class="fcard" data-i="2" data-link="https://sushavadhut.wixsite.com/sushmitaavadhut/split-payment-project-a" data-title="Split-Payment Experience" data-sub="Dell Technologies · B2B/B2C">
-              <img src="assets/splitpayment-hero.png" alt="Person at a laptop on a Dell split-payment checkout screen holding a blue card">
+            <div class="fcard" data-i="2" data-link="assets/additional-fridgeboard.jpg" data-title="Creative Wall" data-sub="Personal · Travel Mementos">
+              <img src="assets/additional-fridgeboard.jpg" alt="Fridge covered in travel magnets, stickers, and postcards">
               <div class="fcard-grad"></div>
-              <div class="fcard-name">Split-Payment</div>
+              <div class="fcard-name">Creative Wall</div>
             </div>
-            <div class="fcard" data-i="3" data-link="https://sushavadhut.wixsite.com/sushmitaavadhut" data-title="Opal Mobile Design System" data-sub="Fynd · Retail E-commerce">
-              <img src="assets/opal-hero.png" alt="Opal Mobile design system documentation">
+            <div class="fcard" data-i="3" data-link="assets/additional-fridgeboard.jpg" data-title="Coming Soon" data-sub="More to come">
+              <img src="assets/additional-fridgeboard.jpg" alt="Placeholder — additional pursuit image coming soon">
               <div class="fcard-grad"></div>
-              <div class="fcard-name">Opal System</div>
+              <div class="fcard-name">Coming Soon</div>
             </div>
           </div>
           <div class="folder-front"></div>
           <div class="folder-shine"></div>
         </div>
-        <h3 class="folder-title">Live Projects</h3>
-        <p class="folder-count">4 projects</p>
+        <h3 class="folder-title">Additional Pursuits</h3>
+        <p class="folder-count">4 pursuits</p>
         <p class="folder-hint">Hover to explore</p>
       </div>
     </div>
