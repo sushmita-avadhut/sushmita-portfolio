@@ -714,6 +714,7 @@
       .chips { gap: 5px; }
       .chip { font-size: 12px; padding: 5px 11px; }
       .jar-stage { width: 140px; height: 186px; }
+      .jar-pile { left: 22px; top: 65px; width: 96px; height: 86px; z-index: 3; }
 
       #about { width: min(320px, 88vw); height: 376px; }
       .about-layout { gap: 24px; }
@@ -1578,15 +1579,21 @@
         filled = !filled;
         clearTimeout(closeTimer);
         if (filled) {
-          jar.classList.remove('closed');
           tools.classList.add('emptied');
           btn.textContent = 'Open me ↑';
           if (isMobile) {
-            playFall();
-            closeTimer = setTimeout(() => {
-              if (filled) { jar.classList.add('closed'); playClose(); }
-            }, 800);
+            src.forEach(s => {
+              const el = document.createElement('div');
+              el.className = 'flight-tile';
+              el.style.cssText = 'position:relative;width:28px;height:28px;border-radius:7px;display:inline-flex;float:left;margin:2px;box-shadow:none;';
+              el.innerHTML = s.innerHTML;
+              el.querySelectorAll('svg,img').forEach(ic => { ic.style.width = '18px'; ic.style.height = '18px'; });
+              pile.appendChild(el);
+            });
+            jar.classList.add('closed');
+            playClose();
           } else {
+            jar.classList.remove('closed');
             build();
             dropIn();
             playFall();
@@ -1597,6 +1604,7 @@
           }
         } else {
           jar.classList.remove('closed');
+          if (isMobile) pile.innerHTML = '';
           playClose(700);
           btn.textContent = 'Make Space ↓';
           stopFall();
