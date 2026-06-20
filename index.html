@@ -382,7 +382,7 @@
     .case-stat .lbl { font-size: 15px; font-weight: 600; color: var(--ink); margin-top: 9px; }
     .case-stat .sub { font-size: 13px; color: var(--ink-muted); margin-top: 4px; }
     @media (max-width: 880px) {
-      .case, .case.reversed { grid-template-columns: 1fr; gap: 30px; padding: 36px 0; }
+      .case, .case.reversed { grid-template-columns: 1fr; gap: 30px; padding: 48px 0; }
       .case-main, .case.reversed .case-main { order: 0; border: none; padding: 0; }
       .case-stats, .case.reversed .case-stats { order: 0; grid-template-columns: 1fr 1fr; gap: 24px; }
       .case-main { flex-direction: column; }
@@ -644,7 +644,7 @@
     }
 
     /* ── HAMBURGER MENU (mobile) ── */
-    .hamburger { display: none; flex-shrink: 0; background: none; border: none; cursor: pointer; padding: 6px; }
+    .hamburger { display: none; flex-shrink: 0; background: none; border: none; cursor: pointer; padding: 6px; margin-left: auto; }
     .hamburger svg { width: 22px; height: 22px; display: block; color: var(--ink); }
     .mobile-overlay {
       display: none; position: fixed; inset: 0; z-index: 500;
@@ -674,7 +674,7 @@
       #nav-pills { display: none; }
       .hud-resume { display: none; }
       .hud-socials a { font-size: 11px; padding: 4px 8px; }
-      .hud-status { font-size: 10px; }
+      .hud-status { display: none; }
       #hud-top { padding: 0 14px; }
       #hud-bottom { padding: 0 12px; gap: 8px; }
 
@@ -693,12 +693,12 @@
       .logo-item img { height: 36px; }
       .logo-item.logo-lg img { height: 50px; }
 
-      .case { padding: 28px 0; gap: 20px; }
+      .case { padding: 40px 0; gap: 20px; }
       .case-img { max-width: 100%; width: 100%; aspect-ratio: 16/11; }
       .case-title { font-size: 18px; }
       .case-quote { font-size: 13.5px; }
       .case-meta-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .case-stats, .case.reversed .case-stats { grid-template-columns: 1fr; gap: 18px; }
+      .case-stats, .case.reversed .case-stats { grid-template-columns: 1fr 1fr; gap: 18px; }
       #f-work .fold-head { margin-bottom: 40px; }
 
       .fold-inner.two-col .fold-title { font-size: clamp(24px, 7vw, 36px); }
@@ -715,7 +715,7 @@
       .chip { font-size: 12px; padding: 5px 11px; }
       .jar-stage { width: 140px; height: 186px; }
 
-      #about { width: min(320px, 88vw); height: auto; min-height: 340px; }
+      #about { width: min(320px, 88vw); height: 376px; }
       .about-layout { gap: 24px; }
       .about-copy h3 { font-size: 22px; }
       .about-copy p { font-size: 13px; }
@@ -746,6 +746,8 @@
       .canvas-cta-btn { font-size: 14px; padding: 12px 24px; }
       .scroll-cue { bottom: 56px; }
 
+      .ld-cover { opacity: 1; }
+      .ld-base { opacity: 0; }
       .ld-center { transform: translateY(-100px); }
       .ld-sound { bottom: max(76px, calc(env(safe-area-inset-bottom) + 56px)); }
       .ld-hint { bottom: max(30px, calc(env(safe-area-inset-bottom) + 20px)); }
@@ -1570,26 +1572,35 @@
         });
       }
 
+      const isMobile = window.matchMedia('(max-width: 480px)').matches;
+
       btn.addEventListener('click', () => {
         filled = !filled;
         clearTimeout(closeTimer);
         if (filled) {
-          build();                            // recompute positions each fill (scroll-safe)
           jar.classList.remove('closed');
           tools.classList.add('emptied');
           btn.textContent = 'Open me ↑';
-          dropIn();
-          playFall();
-          const settle = src.length * 90 + 950;
-          closeTimer = setTimeout(() => {
-            if (filled) { jar.classList.add('closed'); playClose(); }
-          }, settle);
+          if (isMobile) {
+            playFall();
+            closeTimer = setTimeout(() => {
+              if (filled) { jar.classList.add('closed'); playClose(); }
+            }, 800);
+          } else {
+            build();
+            dropIn();
+            playFall();
+            const settle = src.length * 90 + 950;
+            closeTimer = setTimeout(() => {
+              if (filled) { jar.classList.add('closed'); playClose(); }
+            }, settle);
+          }
         } else {
           jar.classList.remove('closed');
           playClose(700);
           btn.textContent = 'Make Space ↓';
           stopFall();
-          flyBack();
+          if (!isMobile) flyBack();
           setTimeout(() => { if (!filled) tools.classList.remove('emptied'); }, 250);
         }
       });
