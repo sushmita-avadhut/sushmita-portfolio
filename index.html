@@ -1579,9 +1579,9 @@
         filled = !filled;
         clearTimeout(closeTimer);
         if (filled) {
-          tools.classList.add('emptied');
-          btn.textContent = 'Open me ↑';
           if (isMobile) {
+            tools.classList.add('emptied');
+            btn.textContent = 'Open me ↑';
             src.forEach(s => {
               const el = document.createElement('div');
               el.className = 'flight-tile';
@@ -1594,6 +1594,8 @@
             playClose();
           } else {
             jar.classList.remove('closed');
+            tools.classList.add('emptied');
+            btn.textContent = 'Open me ↑';
             build();
             dropIn();
             playFall();
