@@ -251,7 +251,7 @@
     /* avatar illustration anchored to the bottom-left corner of the fold */
     .hero-figure {
       position: absolute; left: 0; bottom: 0; z-index: 4; pointer-events: none; user-select: none;
-      width: clamp(220px, 23vw, 330px); height: auto;
+      width: clamp(176px, 18.4vw, 264px); height: auto;
       filter: drop-shadow(0 12px 30px rgba(0,0,0,0.12));
     }
     @media (max-width: 1180px) { .hero-figure { display: none; } }
@@ -643,6 +643,142 @@
       #nav-pills button { padding: 5px 9px; font-size: 11.5px; }
     }
 
+    /* ── HAMBURGER MENU (mobile) ── */
+    .hamburger { display: none; flex-shrink: 0; background: none; border: none; cursor: pointer; padding: 6px; }
+    .hamburger svg { width: 22px; height: 22px; display: block; color: var(--ink); }
+    .mobile-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(249,248,245,0.97); backdrop-filter: blur(20px);
+      flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+      padding: 80px 24px 40px; opacity: 0; transition: opacity 0.25s ease;
+    }
+    .mobile-overlay.open { display: flex; opacity: 1; }
+    .mobile-overlay .mob-close {
+      position: absolute; top: 16px; right: 20px; background: none; border: none;
+      cursor: pointer; font-size: 28px; color: var(--ink); line-height: 1;
+    }
+    .mobile-overlay button, .mobile-overlay a {
+      font-family: var(--font); font-size: 18px; font-weight: 600; color: var(--ink);
+      background: transparent; border: 1.5px solid var(--border); border-radius: 100px;
+      padding: 14px 32px; cursor: pointer; text-decoration: none; transition: all 0.18s;
+      width: 100%; max-width: 300px; text-align: center;
+    }
+    .mobile-overlay button:hover, .mobile-overlay a:hover { border-color: var(--purple); color: var(--purple); }
+    .mobile-overlay .mob-divider { width: 40px; height: 1px; background: var(--border); margin: 8px 0; }
+    .mobile-overlay .mob-socials { display: flex; gap: 10px; margin-top: 8px; }
+    .mobile-overlay .mob-socials a { font-size: 14px; padding: 10px 20px; width: auto; }
+
+    /* ── PHONE BREAKPOINT ── */
+    @media (max-width: 480px) {
+      .hamburger { display: flex; }
+      #nav-pills { display: none; }
+      .hud-resume { display: none; }
+      .hud-socials a { font-size: 11px; padding: 4px 8px; }
+      .hud-status { font-size: 10px; }
+      #hud-top { padding: 0 14px; }
+      #hud-bottom { padding: 0 12px; gap: 8px; }
+
+      .fold { padding: calc(var(--hud-top) + 14px) 16px 52px; }
+      .fold-title { font-size: clamp(22px, 6vw, 30px); }
+      .fold-sub { font-size: 13px; }
+
+      .hero-lp-name { font-size: clamp(24px, 7vw, 40px); }
+      .hero-lp-role { font-size: clamp(17px, 4.5vw, 24px); margin-top: 14px; }
+      .hero-lp-bio { font-size: 14px; margin-top: 16px; }
+      .hero-lp-btns { flex-direction: column; align-items: center; gap: 10px; margin-top: 24px; }
+      .hero-lp-btns .btn-p, .hero-lp-btns .btn-s { width: 100%; max-width: 260px; text-align: center; justify-content: center; padding: 14px 24px; }
+
+      .logos-band { padding: 36px 16px 32px; }
+      .logo-item { padding: 0 20px; }
+      .logo-item img { height: 36px; }
+      .logo-item.logo-lg img { height: 50px; }
+
+      .case { padding: 28px 0; gap: 20px; }
+      .case-img { max-width: 100%; width: 100%; aspect-ratio: 16/11; }
+      .case-title { font-size: 18px; }
+      .case-quote { font-size: 13.5px; }
+      .case-meta-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .case-stats, .case.reversed .case-stats { grid-template-columns: 1fr; gap: 18px; }
+      #f-work .fold-head { margin-bottom: 40px; }
+
+      .fold-inner.two-col .fold-title { font-size: clamp(24px, 7vw, 36px); }
+      #experience { transform: none; width: min(100%, 92vw); }
+      .ftrow { padding: 5px 6px; gap: 6px; }
+      .ftmeta { font-size: 9px; }
+
+      .skills-layout { gap: 24px; }
+      .card { padding: 20px 18px; }
+      .tool-tile { width: 44px; height: 44px; border-radius: 12px; }
+      .tool-tile > svg, .tool-tile > img { width: 26px; height: 26px; }
+      .tool-grid { gap: 10px; }
+      .chips { gap: 5px; }
+      .chip { font-size: 12px; padding: 5px 11px; }
+      .jar-stage { width: 140px; height: 186px; }
+
+      #about { width: min(320px, 88vw); height: auto; min-height: 340px; }
+      .about-layout { gap: 24px; }
+      .about-copy h3 { font-size: 22px; }
+      .about-copy p { font-size: 13px; }
+
+      .blog-canvas { gap: 28px; }
+      #blogs { width: min(100%, 92vw); }
+      .blog-post { padding: 12px; gap: 10px; }
+      .blogs-li { padding: 12px 20px; font-size: 14px; }
+
+      .folder-stage { width: 240px; height: 140px; }
+      .folder-back, .folder-front, .folder-shine { width: 130px; height: 96px; }
+      .folder-tab { width: 48px; height: 14px; }
+      .fcard { width: 115px; height: 160px; left: -57px; top: -80px; }
+      .fcard[data-i="0"] { --ty: -96px; --tx: -100px; --rot: -14deg; }
+      .fcard[data-i="1"] { --ty: -116px; --tx: -34px;  --rot: -5deg;  }
+      .fcard[data-i="2"] { --ty: -116px; --tx: 34px;   --rot: 5deg;   }
+      .fcard[data-i="3"] { --ty: -96px; --tx: 100px;  --rot: 14deg;  }
+      .folder-title { font-size: 18px; }
+      .folder-hint { display: none; }
+
+      .footer-card { padding: 0 8px; }
+      .footer-big { font-size: clamp(26px, 7vw, 40px); }
+      .footer-btns { flex-direction: column; align-items: center; }
+      .footer-btns .btn-p, .footer-btns .btn-s { width: 100%; max-width: 260px; text-align: center; justify-content: center; }
+      .footer-links { gap: 6px; }
+      .footer-links a { font-size: 12px; padding: 6px 12px; }
+
+      .canvas-cta-btn { font-size: 14px; padding: 12px 24px; }
+      .scroll-cue { bottom: 56px; }
+
+      .ld-center { transform: translateY(-100px); }
+      .ld-sound { bottom: max(76px, calc(env(safe-area-inset-bottom) + 56px)); }
+      .ld-hint { bottom: max(30px, calc(env(safe-area-inset-bottom) + 20px)); }
+    }
+
+    @media (max-width: 360px) {
+      .hero-lp-name { font-size: 22px; }
+      .hero-lp-tags { gap: 5px; }
+      .hero-lp-tags .tag { font-size: 9px; padding: 2px 7px; }
+      .case-stat .val { font-size: 24px; }
+      .logo-item img { height: 28px; }
+      .logo-item.logo-lg img { height: 40px; }
+    }
+
+    /* ── TOUCH: folder & about tap-to-toggle ── */
+    .folder-wrap.touch-open .fcard { opacity: 1; pointer-events: auto; transform: translateY(var(--ty)) translateX(var(--tx)) rotate(var(--rot)) scale(1); }
+    .folder-wrap.touch-open .folder-back  { transform: rotateX(-16deg); }
+    .folder-wrap.touch-open .folder-tab   { transform: rotateX(-26deg) translateY(-2px); }
+    .folder-wrap.touch-open .folder-front { transform: rotateX(26deg) translateY(8px); }
+    .folder-wrap.touch-open .folder-shine { transform: rotateX(26deg) translateY(8px); }
+    .folder-wrap.touch-open .folder-title { transform: translateY(4px); }
+    .folder-wrap.touch-open .folder-count { opacity: 0.7; }
+    .folder-wrap.touch-open .folder-hint { opacity: 0; transform: translateY(8px); }
+
+    #about.touch-open .about-reveal { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+    #about.touch-open .about-hint { opacity: 0; }
+
+    .tool-tile.tip-visible::after { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    .tool-tile.tip-visible::before { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* prevent horizontal scroll from absolute positioned decor */
+    html, body { overflow-x: hidden; }
+
     /* ─────────── LANDING INTRO (identical to canvas site) ─────────── */
     #landing { position: fixed; inset: 0; z-index: 2000; overflow: hidden; background: var(--bg); transition: opacity 0.7s ease; }
     #landing.gone { opacity: 0; pointer-events: none; }
@@ -652,7 +788,8 @@
     .ld-wash { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(ellipse 80% 70% at 50% 42%, rgba(255,214,10,0.05), transparent 70%); }
     .ld-center { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; padding: 24px; transform: translateY(-160px); transition: opacity 0.25s ease; }
     .ld-headline { position: relative; height: 1.3em; display: grid; place-items: center; }
-    .ld-line { grid-area: 1 / 1; margin: 0; text-align: center; white-space: nowrap; font-family: var(--font); font-weight: 800; color: var(--ink); font-size: clamp(26px, 4.6vw, 50px); letter-spacing: -1.2px; line-height: 1.25; opacity: 0; transition: opacity 0.7s ease; }
+    .ld-line { grid-area: 1 / 1; margin: 0; text-align: center; font-family: var(--font); font-weight: 800; color: var(--ink); font-size: clamp(26px, 4.6vw, 50px); letter-spacing: -1.2px; line-height: 1.25; opacity: 0; transition: opacity 0.7s ease; }
+    @media (min-width: 481px) { .ld-line { white-space: nowrap; } }
     .ld-line.show { opacity: 1; }
     .ld-line .thin { font-weight: 400; color: var(--ink-soft); }
     .ld-line .hl { background: var(--yellow); border-radius: 5px; padding: 0 7px; }
@@ -712,8 +849,28 @@
       <button data-target="f-blog">Canvas</button>
     </nav>
     <a href="assets/Sushmita-Avadhut-Resume-2026.pdf" target="_blank" class="hud-resume">View Resume ↗</a>
+    <button class="hamburger" id="menuBtn" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
   </header>
   <div id="scroll-progress"></div>
+
+  <!-- ── MOBILE MENU OVERLAY ── -->
+  <div class="mobile-overlay" id="mobileMenu">
+    <button class="mob-close" id="menuClose" aria-label="Close menu">×</button>
+    <button data-target="f-work">Work</button>
+    <button data-target="f-experience">Experience</button>
+    <button data-target="f-skills">Skills</button>
+    <button data-target="f-about">About</button>
+    <button data-target="f-blog">Canvas</button>
+    <div class="mob-divider"></div>
+    <a href="assets/Sushmita-Avadhut-Resume-2026.pdf" target="_blank">View Resume ↗</a>
+    <div class="mob-socials">
+      <a href="https://www.linkedin.com/in/sushmita-avadhut-3850021b2/" target="_blank">LinkedIn</a>
+      <a href="https://www.behance.net/sushmitaavadhut" target="_blank">Behance</a>
+      <a href="mailto:sushmita.avadhut@gmail.com">Email</a>
+    </div>
+  </div>
 
   <!-- ── BOTTOM HUD ── -->
   <footer id="hud-bottom">
@@ -741,6 +898,7 @@
         <ellipse cx="50" cy="24" rx="8.5" ry="25" transform="rotate(225 50 50)"/>
         <ellipse cx="50" cy="24" rx="8.5" ry="25" transform="rotate(270 50 50)"/>
         <ellipse cx="50" cy="24" rx="8.5" ry="25" transform="rotate(315 50 50)"/>
+        <circle cx="50" cy="50" r="9"/>
       </g>
     </svg>
     <svg class="hero-deco d2" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -907,9 +1065,6 @@
           </article>
 
         </div>
-        <div style="text-align:center; margin-top:40px;">
-          <a class="more-work" href="https://sushavadhut.wixsite.com/sushmitaavadhut/case-studies" target="_blank">Previous Work →</a>
-        </div>
       </div>
     </div>
   </section>
@@ -1023,7 +1178,7 @@
       <div class="fold-head">
         <div class="fold-kicker">Toolbox</div>
         <h2 class="fold-title">What I <span class="scribble">Work With</span></h2>
-        <p class="fold-sub">Tap “Fill me” to pour the kit into the jar — then watch a new set surface.</p>
+        <p class="fold-sub">Tap “Make Space” to pour the kit into the jar — then watch a new set surface.</p>
       </div>
       <div class="skills-layout">
         <div class="card" id="tools">
@@ -1096,7 +1251,7 @@
             <img class="jar-img jar-open"   src="assets/jar-open.png"   alt="An open glass jar">
             <img class="jar-img jar-closed" src="assets/jar-closed.png" alt="A closed glass jar full of skills">
           </div>
-          <button class="jar-btn" id="jarBtn">Fill me ↓</button>
+          <button class="jar-btn" id="jarBtn">Make Space ↓</button>
         </div>
       </div>
     </div>
@@ -1233,6 +1388,7 @@
         <ellipse cx="50" cy="24" rx="8.5" ry="25" transform="rotate(225 50 50)"/>
         <ellipse cx="50" cy="24" rx="8.5" ry="25" transform="rotate(270 50 50)"/>
         <ellipse cx="50" cy="24" rx="8.5" ry="25" transform="rotate(315 50 50)"/>
+        <circle cx="50" cy="50" r="9"/>
       </g>
     </svg>
     <svg class="footer-flower f2" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -1431,7 +1587,7 @@
         } else {
           jar.classList.remove('closed');
           playClose(700);
-          btn.textContent = 'Fill me ↓';
+          btn.textContent = 'Make Space ↓';
           stopFall();
           flyBack();
           setTimeout(() => { if (!filled) tools.classList.remove('emptied'); }, 250);
@@ -1499,6 +1655,50 @@
         i = (i + 1) % slides.length;
         slides[i].classList.add('is-active');
       }, 1250);
+    })();
+
+    // ─────────── MOBILE MENU ───────────
+    (function(){
+      const btn = document.getElementById('menuBtn');
+      const overlay = document.getElementById('mobileMenu');
+      const close = document.getElementById('menuClose');
+      if (!btn || !overlay) return;
+      function openMenu(){ overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+      function closeMenu(){ overlay.classList.remove('open'); document.body.style.overflow = ''; }
+      btn.addEventListener('click', openMenu);
+      if (close) close.addEventListener('click', closeMenu);
+      overlay.querySelectorAll('button[data-target]').forEach(b => {
+        b.addEventListener('click', () => { closeMenu(); setTimeout(() => jumpTo(b.dataset.target), 100); });
+      });
+    })();
+
+    // ─────────── TOUCH: tap-to-toggle for hover interactions ───────────
+    (function(){
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      if (!isTouch) return;
+
+      const folder = document.getElementById('liveFolder');
+      if (folder) {
+        folder.querySelector('.folder-hint').textContent = 'Tap to explore';
+        folder.addEventListener('click', function(e){
+          if (e.target.closest('.fcard')) return;
+          folder.classList.toggle('touch-open');
+        });
+      }
+
+      const about = document.getElementById('about');
+      if (about) {
+        const hint = about.querySelector('.about-hint');
+        if (hint) hint.textContent = 'Tap to reveal';
+        about.addEventListener('click', function(){ about.classList.toggle('touch-open'); });
+      }
+
+      document.querySelectorAll('.tool-tile[data-tip]').forEach(tile => {
+        tile.addEventListener('click', function(e){
+          document.querySelectorAll('.tool-tile.tip-visible').forEach(t => { if (t !== tile) t.classList.remove('tip-visible'); });
+          tile.classList.toggle('tip-visible');
+        });
+      });
     })();
   </script>
 

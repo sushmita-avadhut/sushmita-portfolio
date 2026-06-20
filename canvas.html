@@ -978,10 +978,30 @@
     @media (prefers-reduced-motion: reduce) {
       .ld-hint .arr { animation: none; }
     }
+
+    /* ── Canvas mobile notice ── */
+    .canvas-mobile-notice {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+      background: rgba(26,24,36,0.92); backdrop-filter: blur(12px); color: #fff;
+      text-align: center; padding: 14px 20px; font-family: var(--font);
+      font-size: 13px; font-weight: 500; line-height: 1.5;
+    }
+    .canvas-mobile-notice a { color: var(--yellow); font-weight: 700; text-decoration: underline; }
+    .canvas-mobile-notice .dismiss { background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 18px; position: absolute; top: 8px; right: 14px; }
+    @media (max-width: 600px) {
+      .canvas-mobile-notice { display: block; }
+      #hud-bottom { bottom: 54px; }
+    }
   </style>
 </head>
 <body>
 
+
+  <!-- ── MOBILE NOTICE ── -->
+  <div class="canvas-mobile-notice" id="canvasMobileNotice">
+    Best on desktop. Pinch &amp; drag to explore. <a href="index.html">← Back to site</a>
+    <button class="dismiss" onclick="this.parentElement.style.display='none'" aria-label="Dismiss">×</button>
+  </div>
 
   <!-- ── DOG CURSOR ── -->
   <div id="dog-cursor"><img id="dog-img" src="assets/dog-cursor.svg" alt="running dog"></div>
