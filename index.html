@@ -1593,10 +1593,10 @@
             jar.classList.add('closed');
             playClose();
           } else {
+            build();
             jar.classList.remove('closed');
             tools.classList.add('emptied');
             btn.textContent = 'Open me ↑';
-            build();
             dropIn();
             playFall();
             const settle = src.length * 90 + 950;
