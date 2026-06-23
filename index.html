@@ -267,6 +267,7 @@
       display: flex; flex-direction: column; align-items: center; text-align: center;
     }
     .hero-lp-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 30px; }
+    .hero-tag { font-family: var(--font); font-size: 10px; font-weight: 600; color: var(--ink-soft); height: 24px; padding: 0 12px; border-radius: 100px; border: 1.5px solid var(--border); display: inline-flex; align-items: center; justify-content: center; margin-top: 8px; }
     .hero-lp-name {
       font-size: clamp(28px, 4.4vw, 56px); font-weight: 800; color: var(--ink);
       letter-spacing: -0.03em; line-height: 1.06; margin: 0; max-width: 760px;
@@ -620,7 +621,7 @@
     .footer-big .scribble { background: var(--yellow); padding: 0 8px; border-radius: 6px; }
     .footer-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
     .footer-links { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
-    .footer-links a { font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--ink-soft); text-decoration: none; padding: 8px 16px; border-radius: 100px; border: 1.5px solid var(--border); transition: all 0.18s; }
+    .footer-links a { font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--ink-soft); text-decoration: none; height: 32px; padding: 0 16px; border-radius: 100px; border: 1.5px solid var(--border); display: inline-flex; align-items: center; justify-content: center; transition: all 0.18s; }
     .footer-links a:hover { color: var(--purple); border-color: var(--purple); background: var(--purple-light); }
     .footer-meta { font-family: var(--mono); font-size: 11px; color: var(--ink-muted); letter-spacing: 0.04em; }
     .to-top { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-family: var(--mono); font-size: 11px; color: var(--ink-muted); cursor: pointer; background: none; border: none; transition: color 0.18s; }
@@ -757,7 +758,7 @@
     @media (max-width: 360px) {
       .hero-lp-name { font-size: 22px; }
       .hero-lp-tags { gap: 5px; }
-      .hero-lp-tags .tag { font-size: 9px; padding: 2px 7px; }
+      .hero-tag { font-size: 11px; height: 28px; padding: 0 12px; }
       .case-stat .val { font-size: 24px; }
       .logo-item img { height: 28px; }
       .logo-item.logo-lg img { height: 40px; }
@@ -877,13 +878,11 @@
 
   <!-- ── BOTTOM HUD ── -->
   <footer id="hud-bottom">
-    <span class="hud-status">Open to opportunities</span>
     <div class="hud-socials">
       <a href="https://www.linkedin.com/in/sushmita-avadhut-3850021b2/" target="_blank">LinkedIn</a>
       <a href="https://www.behance.net/sushmitaavadhut" target="_blank">Behance</a>
-      <a href="mailto:sushmita.avadhut@gmail.com">Email ✉</a>
+      <a href="mailto:sushmita.avadhut@gmail.com">Email</a>
     </div>
-    <span class="hud-section">✦ <b id="hud-current">Intro</b></span>
   </footer>
 
   <!-- ═══════════════════ FOLD 2 · HERO ═══════════════════ -->
@@ -923,11 +922,11 @@
     -->
     <div class="hero-lp reveal">
       <div class="hero-lp-tags">
-        <span class="tag t-yellow">Enterprise</span>
-        <span class="tag t-olive">E-commerce</span>
-        <span class="tag t-peach">SaaS</span>
-        <span class="tag dark">Ex-Dell</span>
-        <span class="tag dark">Ex-Autodesk</span>
+        <span class="hero-tag">Systems Thinker</span>
+        <span class="hero-tag">0→1 Builder</span>
+        <span class="hero-tag">Research-Led</span>
+        <span class="hero-tag">AI Native</span>
+        <span class="hero-tag">Hands-on</span>
       </div>
       <h1 class="hero-lp-name">I design and ship product UX, end to end.</h1>
       <h2 class="hero-lp-role"><span class="hero-hl">Product Builder</span> &amp; UX Thinker</h2>
@@ -1179,7 +1178,6 @@
   <section class="fold" id="f-skills">
     <div class="fold-inner reveal">
       <div class="fold-head">
-        <div class="fold-kicker">Toolbox</div>
         <h2 class="fold-title">What I <span class="scribble">Work With</span></h2>
         <p class="fold-sub">Tap “Make Space” to pour the kit into the jar — then watch a new set surface.</p>
       </div>
@@ -1264,7 +1262,6 @@
   <section class="fold" id="f-about">
     <div class="fold-inner reveal">
       <div class="fold-head">
-        <div class="fold-kicker">Behind the Work</div>
         <h2 class="fold-title">About <span class="scribble">Me</span></h2>
       </div>
       <div class="about-layout">
@@ -1308,7 +1305,6 @@
     <div class="blog-canvas reveal">
       <!-- blog card (left) -->
       <div id="blogs">
-        <div class="card-label"><span></span> Thoughts &amp; Writing</div>
         <h2 class="blogs-h">Reflections ✍️</h2>
         <p class="blogs-sub">Ideas, learnings &amp; design musings</p>
         <div class="blog-post">
@@ -1420,7 +1416,6 @@
           <a href="mailto:sushmita.avadhut@gmail.com">Email</a>
           <a href="canvas.html">Canvas mode ✦</a>
         </div>
-        <div class="footer-meta">© 2026 Sushmita Avadhut · Designed &amp; built end-to-end</div>
         <button class="to-top" onclick="jumpTo('f-hero')">↑ Back to top</button>
       </div>
     </div>
